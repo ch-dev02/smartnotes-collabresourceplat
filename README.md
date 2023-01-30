@@ -1,1 +1,3 @@
-echo "# SmartNotes Collaborative Resource Platform" 
+# SmartNotes
+
+## The Collaborative Resource and Revision Platform
