@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Sign Up</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/signup" method="post" name="signup" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.email(class_='form-control', placeholder='Enter your email') }}
+                <label for="email">Email Address</label>
+            </div>
+            <br/>
+            <div class="row form-floating">
+                {{ form.password(class_='form-control', placeholder='Enter your password') }}
+                <label for="password">Password</label>
+            </div>
+            <br>
+            <div class="row form-floating">
+                {{ form.confirm_password(class_='form-control', placeholder='Re-enter your password') }}
+                <label for="confirm_password">Confirm Password</label>
+            </div>
+            <div class="row form-check">
+                {{ form.terms(class_='form-check-input') }}
+                <label for="terms">I agree to the <a href="/terms">Terms and Conditions</a></label>
+            </div>
+            <div class="row form-check">
+                {{ form.privacy(class_='form-check-input') }}
+                <label for="privacy">I agree to the <a href="/privacy">Privacy Policy</a></label>
+            </div>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Sign Up">
+            </div>
+        </form>
+        <br/>
+        <div class="row">
+            <h6>Already have an account? <a href="/login">Login!</a></h6>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

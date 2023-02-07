@@ -155,3 +155,12 @@ nav {
         display: initial;
     }
 }
+
+/***** FIX CHECKBOX *****/
+.form-check-input {
+    padding-right: 0 !important;
+}
+
+.form-check {
+    margin: 20px 0;
+}
