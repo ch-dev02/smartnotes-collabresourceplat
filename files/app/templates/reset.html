@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Reset Password</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/reset" method="post" name="reset" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            {{ form.user_id }}
+            {{ form.token }}
+            <div class="row form-floating">
+                {{ form.new_password(class_='form-control', placeholder='Enter your new password') }}
+                <label for="new_password">New Password</label>
+            </div>
+            <br>
+            <div class="row form-floating">
+                {{ form.confirm_password(class_='form-control', placeholder='Enter your new password again') }}
+                <label for="confirm_password">Confirm Password</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Reset">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

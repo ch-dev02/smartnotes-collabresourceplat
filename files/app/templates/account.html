@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Manage Account</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <h4 class="row justify-content-md-center">Change Password:</h4>
+        <form action="/account" method="post" name="account" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.old_password(class_='form-control', placeholder='Enter your old password') }}
+                <label for="old_password">Old Password</label>
+            </div>
+            <br/>
+            <div class="row form-floating">
+                {{ form.new_password(class_='form-control', placeholder='Enter your new password') }}
+                <label for="new_password">New Password</label>
+            </div>
+            <br/>
+            <div class="row form-floating">
+                {{ form.confirm_password(class_='form-control', placeholder='Confirm your new password') }}
+                <label for="confirm_password">Confirm New Password</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Save">
+            </div>
+        </form>
+        <br>
+        <h4 class="row justify-content-md-center">Delete Account:</h4>
+        <p>This will remove the following:</p>
+        <ul>
+            <li>Owned Groups</li>
+            <li>Group Memberships</li>
+            <li>Password Reset Tokens</li>
+            <li>Uploaded Resources</li>
+            <li>Generated Keywords</li>
+            <li>Posted Reviews</li>
+        </ul>
+        <form action="/deleteAccount" method="post" name="delete" enctype="multipart/form-data">
+            {{ form2.csrf_token }}
+            <div class="row form-floating">
+                {{ form2.password(class_='form-control', placeholder='Enter your password') }}
+                <label for="password">Password</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-danger col" value="Delete Account">
+            </div>
+    </div>
+</div>
+
+{% endblock %}
