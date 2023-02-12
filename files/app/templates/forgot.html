@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Forgotten Password</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/forgot" method="post" name="forgot" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.email(class_='form-control', placeholder='Enter your email') }}
+                <label for="email">Email Address</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Send Request">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
