@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Create Group</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/create-group" method="post" name="create-group" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.title(class_='form-control', placeholder='Group Name') }}
+                <label for="title">Group Name</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Create Group">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

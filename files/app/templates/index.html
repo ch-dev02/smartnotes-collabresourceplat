@@ -1,3 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
+<h1 class="row justify-content-center">My Groups</h1>
+<br>
+{% if groups|length == 0 %}
+<p class="row justify-content-center">You are not a member of any groups.</p>
+{% else %}
+<div class="groups_grid">
+    {% for group in groups %}
+    <div class="list-item" onclick="window.location.href='/group/{{group.id}}'">
+        <button type="button" class="list-item-btn"><b>{{group.title}}</b> : <i>{{group.code}}</i></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

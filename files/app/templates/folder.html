@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h1>{{ folder.title }}</h1>
+  <p><a href="/group/{{group_id}}"><i>{{group_title}}</i></a></p>
+  <div class="dropdown">
+    <button onclick="addDropdown()" class="btn btn-success dropbtn">Add Resource</button>
+    <div id="addDropdown" class="dropdown-content">
+      {% if owner == current_user.id %}
+      <a href="/upload_material?folder={{folder.id}}">Lecture Material</a>
+      <a href="/upload_transcript?folder={{folder.id}}">Lecture Transcript</a>
+      <a href="/add_notes?folder={{folder.id}}">Notes</a>
+      <a href="/add_url?folder={{folder.id}}">URL</a>
+      {% else %}
+      <a href="/add_notes?folder={{folder.id}}">Notes</a>
+      <a href="/add_url?folder={{folder.id}}">URL</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if owner == current_user.id %}
+  <form action="/folder/delete" method="post" name="delete" class="d-inline-block" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ form.folder_id }}
+    <input type="submit" class="btn btn-danger col" value="Delete Folder">
+  </form>
+  {% endif %}
+  <div class="spacer"></div>
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'Admin');loadResources('Admin')">Admin Uploads</button>
+    <button class="tablinks" onclick="openTab(event, 'User');loadResources('User')">User Uploads</button>
+  </div>
+
+  <div id="Admin" class="tabcontent">
+    <div class="loader">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div id="User" class="tabcontent">
+    <div class="loader">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+</div>
+<script>
+  var adminFetched = false;
+  var userFetched = false;
+
+  function loadResources(type) {
+    var tab = document.getElementById(type);
+    if (type == "Admin" && adminFetched) {
+      return;
+    } else if (type == "User" && userFetched) {
+      return;
+    } else if (type != "Admin" && type != "User") {
+      return;
+    }else if (type == "Admin" && !adminFetched) {
+      adminFetched = true;
+    } else if (type == "User" && !userFetched) {
+      userFetched = true;
+    }
+
+    // Do some AJAX stuff to get resources will be
+    // implemented once first type of resouce creation is done
+  }
+
+  function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  function addDropdown() {
+    document.getElementById("addDropdown").classList.toggle("show");
+  }
+
+  window.onclick = function (event) {
+    if (!event.target.matches('.dropbtn')) {
+      var dropdowns = document.getElementsByClassName("dropdown-content");
+      var i;
+      for (i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}

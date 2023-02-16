@@ -1,0 +1,12 @@
+2023-02-16 13:19:29,881 INFO : [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2023-02-16 13:19:29,881 INFO : [33mPress CTRL+C to quit[0m
+2023-02-16 13:19:29,882 INFO :  * Restarting with stat
+2023-02-16 13:19:30,937 WARNING :  * Debugger is active!
+2023-02-16 13:19:30,946 INFO :  * Debugger PIN: 108-617-307
+2023-02-16 13:19:34,255 INFO : 127.0.0.1 - - [16/Feb/2023 13:19:34] "[32mGET / HTTP/1.1[0m" 302 -
+2023-02-16 13:19:34,264 INFO : User accessed login page
+2023-02-16 13:19:34,283 INFO : 127.0.0.1 - - [16/Feb/2023 13:19:34] "GET /login?next=%2F HTTP/1.1" 200 -
+2023-02-16 13:19:34,346 INFO : 127.0.0.1 - - [16/Feb/2023 13:19:34] "[36mGET /static/css/styles.css HTTP/1.1[0m" 304 -
+2023-02-16 13:19:34,368 INFO : 127.0.0.1 - - [16/Feb/2023 13:19:34] "[36mGET /static/assets/logo.svg HTTP/1.1[0m" 304 -
+2023-02-16 13:19:34,457 INFO : 127.0.0.1 - - [16/Feb/2023 13:19:34] "[36mGET /static/assets/logo_small.ico HTTP/1.1[0m" 304 -

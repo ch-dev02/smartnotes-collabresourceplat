@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>{{ group.title }}</h1>
+    <p>Join Code: <i>{{ group.code }}</i></p>
+    {% if group.owner == current_user.id %}
+    <form action="/group/delete" method="post" name="delete" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.group_id }}
+        <input type="submit" class="btn btn-danger col" value="Delete Group">
+    </form>
+    <hr>
+    <form action="/folder/create" method="post">
+        {{ form_create_folder.csrf_token }}
+        {{ form_create_folder.group_id }}
+        <div class="input-group mb-3">
+            {{ form_create_folder.title(class_='form-control', placeholder='New Folder Title') }}
+            <div class="input-group-append">
+                <input type="submit" class="btn btn-primary" value="Create">
+            </div>
+        </div>
+    </form>
+    {% else %}
+    <form action="/group/leave" method="post" name="leave" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.group_id }}
+        <input type="submit" class="btn btn-danger col" value="Leave Group">
+    </form>
+    <hr>
+{% endif %}
+{% if folders|length == 0 %}
+<br>
+<p class="row justify-content-center">There are no folders in this group.</p>
+{% else %}
+<div class="folders_grid">
+    {% for folder in folders %}
+    <div class="list-item" onclick="window.location.href='/folder/{{folder.id}}'">
+        <button type="button" class="list-item-btn"><b>{{folder.title}}</b></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+</div>
+{% endblock %}
