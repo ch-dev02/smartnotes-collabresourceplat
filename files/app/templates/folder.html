@@ -64,8 +64,20 @@
       userFetched = true;
     }
 
-    // Do some AJAX stuff to get resources will be
-    // implemented once first type of resouce creation is done
+    $.ajax({
+      url: "/resources",
+      type: "get", //send it through get method
+      data: {
+        folder: {{folder.id}},
+        type: type
+      },
+      success: function (response) {
+        tab.innerHTML = response;
+      },
+      error: function (xhr) {
+        tab.innerHTML = "<p style='text-align:center;color:red;'>Failed to get any resources. Server did not respond.</p>";
+      }
+    });
   }
 
   function openTab(evt, tabName) {

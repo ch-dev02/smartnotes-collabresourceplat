@@ -9,9 +9,11 @@ import secrets
 import validators
 from werkzeug.utils import secure_filename
 import os
+import math
+from ..scripts import *
 
 logger = logging.getLogger(__name__)
-
+           
 """
 Home Page
 User must be logged in
@@ -222,6 +224,354 @@ def folder(id):
     return render_template('folder.html', folder=folder, owner=group.owner, form=form, group_title=group.title, group_id=group.id)
 
 """
+Add notes page
+User must be logged in
+Folder id must be specified and validates
+Folder's parent group must exist
+User must be a member of the group or the group's owner
+If user is member, cannot have >1 set of notes in folder
+GET Request:
+  - Render add notes page
+POST Request and form validates:
+  - Validate title and notes are not empty
+  - HTML Escape title and notes
+  - Validate title is unique in folder
+  - Create resource
+  - Redirect to folder page
+POST Request and form does not validate:
+  - Log and alert user to error
+  - Redirect to folder page
+"""
+@app.route("/add_notes", methods=['GET', 'POST'])
+@login_required
+def add_notes():
+    if request.args.get('folder') is None or not request.args.get('folder').isdigit():
+        flash('Invalid request', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add notes')
+        return redirect(url_for('index'))
+    id = int(request.args.get('folder'))
+    folder = models.Folder.query.filter_by(id=id).first()
+    if not folder:
+        flash('Folder doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add notes to invalid folder: ' + str(id))
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        flash('Folder\'s parent group doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add notes to folder in invalid group: ' + str(folder.group))
+        return redirect(url_for('index'))
+    member = models.Member.query.filter_by(user=current_user.id, group=group.id).first()
+    if group.owner != current_user.id and not member:
+        flash('You don\'t have permission to add to this folder', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to add notes to folder: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    other_notes = models.Resource.query.filter_by(folder=id, type="notes", creator=current_user.id).all()
+    if other_notes and group.owner != current_user.id:
+        flash('You already have notes in this folder. Please locate previous notes and edit those.', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add >1 set of notes to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+    form = NotesForm()
+    if request.method == 'GET':
+        logger.info('User ' + current_user.email + ' requested add notes page for folder: ' + str(id))
+        return render_template('add_notes.html', folder=folder, form=form, owner=group.owner)
+    elif form.validate_on_submit():
+        title = form.title.data
+        notes = form.notes.data
+        if title.strip() == '' or notes.strip() == '':
+            flash('Fields cannot be empty', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add notes to folder: ' + str(id))
+            return redirect(url_for('add_notes', folder=id))
+        title = html.escape(title)
+        notes = html.escape(notes)
+        existing = models.Resource.query.filter_by(folder=id, title=title).all()
+        if existing:
+            flash('Title already exists in folder', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add notes to folder: ' + str(id))
+            return redirect(url_for('add_notes', folder=id))
+        resource = models.Resource(data=notes, title=title, folder=id, creator=current_user.id, type="notes")
+        db.session.add(resource)
+        db.session.commit()
+        flash("Notes added", "success")
+        logger.info('User ' + current_user.email + ' added notes ' + str(resource.id) + ' to folder ' + str(id))
+        return redirect(url_for('folder', id=id))
+    else:
+        flash('Error adding notes', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add notes to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+
+"""
+Edit notes page
+User must be logged in
+Notes id must be specified and validates
+Notes must exist
+Folder must exist
+User must be a member of the group or the group's owner
+If user is member, cannot have >1 set of notes in folder
+GET Request:
+    - Render edit notes page
+POST Request and form validates:
+    - Validate title and notes are not empty
+    - HTML Escape title and notes
+    - Validate title is unique in folder
+    - Update resource
+    - Redirect to folder page
+POST Request and form does not validate:
+    - Log and alert user to error
+    - Redirect to folder page
+"""
+@app.route("/edit_notes", methods=['GET', 'POST'])
+@login_required
+def edit_notes():
+    if request.args.get('id') is None or not request.args.get('id').isdigit():
+        flash('Invalid request', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to edit notes')
+        return redirect(url_for('index'))
+    id = int(request.args.get('id'))
+    resource = models.Resource.query.filter_by(id=id).first()
+    if not resource:
+        flash('Notes don\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to edit invalid notes: ' + str(id))
+        return redirect(url_for('index'))
+    folder = models.Folder.query.filter_by(id=resource.folder).first()
+    if not folder:
+        flash('Notes\' parent folder doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to edit notes in invalid folder: ' + str(resource.folder))
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        flash('Notes\' parent folder\'s parent group doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to edit notes in folder in invalid group: ' + str(folder.group))
+        return redirect(url_for('index'))
+    member = models.Member.query.filter_by(user=current_user.id, group=group.id).first()
+    if group.owner != current_user.id and not member:
+        flash('You don\'t have permission to edit these notes', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to edit notes: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    if resource.creator != current_user.id:
+        flash('You don\'t have permission to edit these notes', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to edit notes: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    form = NotesForm()
+    if request.method == 'GET':
+        form.title.data = resource.title
+        form.notes.data = html.unescape(resource.data)
+        logger.info('User ' + current_user.email + ' requested edit notes page for notes: ' + str(id))
+        return render_template('edit_notes.html', folder=folder, form=form, owner=group.owner)
+    elif form.validate_on_submit():
+        title = form.title.data
+        notes = form.notes.data
+        if title.strip() == '' or notes.strip() == '':
+            flash('Fields cannot be empty', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to edit notes: ' + str(id))
+            return redirect(url_for('edit_notes', id=id))
+        title = html.escape(title)
+        notes = html.escape(notes)
+        existing = models.Resource.query.filter_by(folder=resource.folder, title=title).first()
+        if existing and existing.id != id:
+            flash('Title already exists in folder', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to edit notes: ' + str(id))
+            return redirect(url_for('edit_notes', id=id))
+        resource.title = title
+        resource.data = notes
+        Keywords = models.Keywords.query.filter_by(resource=id).all()
+        for keyword in Keywords:
+            db.session.delete(keyword)
+        queue = models.Queue.query.filter_by(resource=id).first()
+        if queue:
+            db.session.delete(queue)
+        db.session.commit()
+        flash("Notes edited", "success")
+        logger.info('User ' + current_user.email + ' edited notes: ' + str(id))
+        return redirect(url_for('folder', id=resource.folder))
+    else:
+        flash('Error editing notes', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to edit notes: ' + str(id))
+        return redirect(url_for('folder', id=resource.folder))
+
+"""
+Get all resources in a folder with user or admin type
+For ajax requests
+User must be logged in
+Get Request Only
+Parameters:
+  folder: id of folder to get resources from
+  type: type of resources to get (user or admin)
+Returns:
+  HTML to be inserted into page
+Check if folder and type are valid
+Check if folder exists
+Check if parent group exists
+Check if user has permission to view folder
+Get all resources in folder of specified type (if admin, ignore hidden value)
+Sum & average all reviews for each resource
+Render template with resources
+"""
+@app.route('/resources', methods=['GET'])
+@login_required
+def resources():
+    if request.args.get('folder') is None or not request.args.get('folder').isdigit():
+        logger.info('User ' + current_user.email + ' sent invalid request to view resources')
+        return 'Missing or Invalid folder'
+    id = int(request.args.get('folder'))
+    if request.args.get('type') is None:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resources')
+        return 'Missing or Invalid tab'
+    type = str(request.args.get('type'))
+    folder = models.Folder.query.filter_by(id=id).first()
+    if not folder:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resources')
+        return 'Missing or Invalid folder'
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resources')
+        return 'Missing or Invalid folder'
+    if group.owner != current_user.id and not models.Member.query.filter_by(user=current_user.id, group=group.id).first():
+        logger.warning('User ' + current_user.email + ' tried to view resources without permission')
+        return 'Missing or Invalid folder'
+    if type != "Admin" and type != "User":
+        logger.info('User ' + current_user.email + ' sent invalid request to view resources')
+        return 'Missing or Invalid tab'
+    if type == "Admin":
+        resources = models.Resource.query.filter_by(folder=id, creator=group.owner).all()
+    elif type == "User":
+        resources = models.Resource.query.filter_by(folder=id).filter(models.Resource.creator != group.owner).all()
+    if not resources:
+        logger.info('User ' + current_user.email + ' tried to view resources but found none of type ' + type + " in folder " + str(id))
+        return 'No resources found'
+    dictratings = {}
+    dictkeywords = {}
+    for resource in resources:
+        ratings = models.Review.query.filter_by(resource=resource.id).all()
+        if ratings:
+            dictratings[int(resource.id)] = str(sum(rating.rating for rating in ratings) / len(ratings)) + "/5"
+        else:
+            dictratings[int(resource.id)] = "NA"
+        keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+        if keywords:
+            dictkeywords[int(resource.id)] = json.loads(keywords.json)
+        else:
+            dictkeywords[int(resource.id)] = []
+    logger.info('User ' + current_user.email + ' viewed resources in folder ' + str(id) + "with type " + type )
+    return render_template('resources.html', resources=resources, ratings=dictratings, keywords=dictkeywords)
+
+"""
+Get specific resource page
+User must be logged in
+Get Request Only
+Parameters:
+  id: id of resource to get
+Returns:
+  Resource page
+Check if resource exists
+Check if folder exists
+Check if parent group exists
+Check if user has permission to view folder
+Get all reviews for resource and generate their delete forms
+Sum & average all reviews for resource
+Render template with resource
+"""
+@app.route('/resource/<id>', methods=['GET'])
+@login_required
+def resource(id):
+    resource = models.Resource.query.filter_by(id=id).first()
+    if not resource:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resource ' + str(id))
+        flash("Resource not found", "danger")
+        return redirect(url_for('index'))
+    folder = models.Folder.query.filter_by(id=resource.folder).first()
+    if not folder:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resource ' + str(id) + " with missing folder")
+        flash("Resource not found", "danger")
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        logger.info('User ' + current_user.email + ' sent invalid request to view resource ' + str(id) + " with missing group")
+        flash("Resource not found", "danger")
+        return redirect(url_for('index'))
+    if group.owner != current_user.id and not models.Member.query.filter_by(user=current_user.id, group=group.id).first():
+        logger.warning('User ' + current_user.email + ' tried to view resource without permission')
+        flash("You do not have permission to view this resource", "danger")
+        return redirect(url_for('index'))
+    form = DelResourceForm()
+    form.resource_id.data = id
+    logger.info('User ' + current_user.email + ' viewed resource ' + str(id))
+    reviews = models.Review.query.filter_by(resource=id).all()
+    delForms = {}
+    if reviews:
+        rating = str(sum(review.rating for review in reviews) / len(reviews)) + "/5"
+    else:
+        rating = "No Ratings"
+    already_reviewed = models.Review.query.filter_by(resource=id, creator=current_user.id).first()
+    dbKeywords = models.Keywords.query.filter_by(resource=id).first()
+    if not dbKeywords:
+        keywords = None
+    else:
+        keywords = json.loads(dbKeywords.json)
+    return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, keywords=keywords)
+
+"""
+Delete specific resource
+User must be logged in
+Post Request Only
+If form is valid:
+  Check if resource exists
+  Check if folder exists
+  Check if parent group exists
+  Check if user has permission to delete
+  Delete resource
+  Delete all reviews for resource
+  Delete all files for resource
+  Delete resource
+  Log action
+  Redirect to folder page
+Else:
+  Log invalid request
+  Flash error
+  Redirect to index
+"""
+@app.route('/resource/delete', methods=['POST'])
+@login_required
+def delete_resource():
+    form = DelResourceForm()
+    if form.validate_on_submit():
+        resource = models.Resource.query.filter_by(id=form.resource_id.data).first()
+        if not resource:
+            logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data))
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        folder = models.Folder.query.filter_by(id=resource.folder).first()
+        if not folder:
+            logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data) + " with missing folder")
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        group = models.Group.query.filter_by(id=folder.group).first()
+        if not group:
+            logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data) + " with missing group")
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        if resource.creator != current_user.id and group.owner != current_user.id:
+            logger.warning('User ' + current_user.email + ' tried to delete resource without permission')
+            flash("You do not have permission to delete this resource", "danger")
+            return redirect(url_for('index'))
+        reviews = models.Review.query.filter_by(resource=form.resource_id.data).all()
+        for review in reviews:
+            db.session.delete(review)
+        keywords = models.Keywords.query.filter_by(resource=form.resource_id.data).first()
+        if keywords:
+            db.session.delete(keywords)
+        if resource.type == "material" or resource.type == "transcript":
+            os.remove(resource.data)
+        db.session.delete(resource)
+        db.session.commit()
+        logger.info('User ' + current_user.email + ' deleted resource ' + str(form.resource_id.data))
+        flash("Resource deleted", "success")
+        return redirect(url_for('folder', id=folder.id))
+    else:
+        logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data))
+        flash("Invalid request", "danger")
+        return redirect(url_for('index'))
+
+"""
 Delete folder route
 User must be logged in
 Post Request Only
@@ -259,7 +609,16 @@ def delete_folder():
             logger.warning('User ' + current_user.email + ' tried to delete folder without permission')
             flash("You do not have permission to delete this folder", "danger")
             return redirect(url_for('index'))
-        # Do some stuff to delete resources once they are implemented
+        resources = models.Resource.query.filter_by(folder=form.folder_id.data).all()
+        for resource in resources:
+            reviews = models.Review.query.filter_by(resource=resource.id).all()
+            for review in reviews:
+                db.session.delete(review)
+            keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+            db.session.delete(keywords)
+            if resource.type == "material" or resource.type == "transcript":
+                os.remove(resource.data)
+            db.session.delete(resource)
         db.session.delete(folder)
         db.session.commit()
         logger.info('User ' + current_user.email + ' deleted folder ' + str(form.folder_id.data))
@@ -310,7 +669,15 @@ def delete_group():
             db.session.delete(member)
         folders = models.Folder.query.filter_by(group=id).all()
         for folder in folders:
-            # Do some stuff to delete resources once they are implemented
+            resources = models.Resource.query.filter_by(folder=folder.id).all()
+            for resource in resources:
+                reviews = models.Review.query.filter_by(resource=resource.id).all()
+                for review in reviews:
+                    db.session.delete(review)
+                keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+                if resource.type == "material" or resource.type == "transcript":
+                    os.remove(resource.data)
+                db.session.delete(resource)
             db.session.delete(folder)
         db.session.delete(group)
         db.session.commit()
@@ -321,7 +688,6 @@ def delete_group():
         logger.info('User ' + current_user.email + ' sent invalid request to delete group ' + str(form.group_id.data))
         flash("Invalid request", "danger")
         return redirect(url_for('index'))
-
 
 """
 Leave group route
@@ -357,7 +723,23 @@ def leave_group():
             flash("Invalid request, you are not a member of this group", "danger")
             return redirect(url_for('index'))
         db.session.delete(member)
-        # Do some stuff to delete resources once they are implemented    
+        folders = models.Folder.query.filter_by(group=id).all()
+        for folder in folders:
+            resources = models.Resource.query.filter_by(folder=folder.id).first()
+            for resource in resources:
+                if resource.creator == current_user.id:
+                    reviews = models.Review.query.filter_by(resource=resource.id).all()
+                    for review in reviews:
+                        db.session.delete(review)
+                    keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+                    db.session.delete(keywords)
+                    if resource.type == "material" or resource.type == "transcript":
+                        os.remove(resource.data)
+                    db.session.delete(resource)
+                else:
+                    reviews = models.Review.query.filter_by(resource=resource.id, user=current_user.id).all()
+                    for review in reviews:
+                        db.session.delete(review)
         db.session.commit()
         logger.info('User ' + current_user.email + ' left group ' + str(id))
         flash("You have left the group", "success")

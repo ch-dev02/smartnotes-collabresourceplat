@@ -282,3 +282,178 @@ nav {
 .show {
     display: block;
 }
+
+/***** RESOURCE BANNER *****/
+.res-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #cdcdcd;
+    cursor: pointer;
+}
+
+.res-wrapper:hover {
+    background-color: #e0e0e0;
+}
+
+.res-wrapper:nth-of-type(1) {
+    margin-top: 0;
+}
+
+.res-wrapper>* {
+    padding: 10px;
+    flex: 1 100%;
+}
+
+.res-main {
+    text-align: left;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+.res-aside-l {
+    font-size: x-large;
+}
+
+.res-aside-r {
+    font-size: large;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+.res-aside {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+@media all and (min-width: 600px) {
+    .res-aside {
+        flex: 1 0 0;
+    }
+
+    .res-aside-l {
+        border-right: 0px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .res-aside-l {
+        border-bottom: 1px solid #cdcdcd;
+    }
+}
+
+@media all and (min-width: 800px) {
+    .res-main {
+        flex: 5 0px;
+        order: 2;
+    }
+
+    .res-aside-l {
+        order: 1;
+    }
+
+    .res-aside-r {
+        order: 3;
+    }
+}
+
+@media all and (max-width: 800px) {
+    .res-main {
+        min-height: 40px;
+        text-align: center;
+        border-bottom: 1px solid #cdcdcd;
+    }
+
+    .res-aside {
+        min-height: 40px;
+    }
+
+    .res-aside-l {
+        border-right: 1px solid #cdcdcd;
+    }
+}
+
+.res-keywords {
+    order: 4;
+    border-top: 1px solid #cdcdcd;
+    background-color: #f9f9f9;
+}
+
+.res-no-key{
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+/***** RESOURCE LOADER *****/
+.loader {
+    margin: 20px auto;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.loader div {
+    display: inline-block;
+    position: absolute;
+    left: 8px;
+    width: 16px;
+    background: rgba(0, 136, 169, 1);
+    animation: loader 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+
+.loader div:nth-child(1) {
+    left: 8px;
+    animation-delay: -0.24s;
+}
+
+.loader div:nth-child(2) {
+    left: 32px;
+    animation-delay: -0.12s;
+}
+
+.loader div:nth-child(3) {
+    left: 56px;
+    animation-delay: 0;
+}
+
+@keyframes loader {
+    0% {
+        top: 8px;
+        height: 64px;
+    }
+
+    50%,
+    100% {
+        top: 24px;
+        height: 32px;
+    }
+}
+
+/****** SAVE NOTES BUTTON ******/
+input[value="Save Notes"] {
+    max-width: 200px;
+}
+
+/**** CLASS TO SET WORD WRAP ****/
+.word-break-all {
+    word-break: break-all;
+}
+
+/***** KEYWORD LIST *****/
+.bubble{
+    display: inline-block;
+    margin: 2px 0;
+    background-color: #0088a9;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: smaller;
+}

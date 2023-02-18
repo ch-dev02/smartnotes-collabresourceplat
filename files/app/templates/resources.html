@@ -1,0 +1,71 @@
+{% for resource in resources %}
+    {% if resource.type == "material" %}
+        <div class="res-wrapper" onclick="window.location.href='/resource/{{ resource.id }}'">
+            <div class="res-main word-break-all">
+                {{ resource.title }}
+            </div>
+            <div class="res-aside res-aside-l"><i class="bi bi-file-earmark"></i></div>
+            <div class="res-aside res-aside-r">{{ ratings[resource.id] }}</div>
+            <div class="res-keywords">
+                {% if keywords[resource.id] %}
+                {% for keyword in keywords[resource.id] %}
+                <p class="bubble">{{keyword}}</p>
+                {% endfor %}
+                {% else %}
+                <p class="res-no-key">No Keywords Generated</p>
+                {% endif %}
+            </div>
+        </div>
+    {% elif resource.type == "transcript" %}
+    <div class="res-wrapper" onclick="window.location.href='/resource/{{ resource.id }}'">
+        <div class="res-main word-break-all">
+            {{ resource.title }}
+        </div>
+        <div class="res-aside res-aside-l"><i class="bi bi-chat-left-text"></i></div>
+        <div class="res-aside res-aside-r">{{ ratings[resource.id] }}</div>
+        <div class="res-keywords">
+            {% if keywords[resource.id] %}
+            {% for keyword in keywords[resource.id] %}
+            <p class="bubble">{{keyword}}</p>
+            {% endfor %}
+            {% else %}
+            <p class="res-no-key">No Keywords Generated</p>
+            {% endif %}
+        </div>
+    </div>
+    {% elif resource.type == "notes" %}
+    <div class="res-wrapper" onclick="window.location.href='/resource/{{ resource.id }}'">
+        <div class="res-main word-break-all">
+            {{ resource.title }}
+        </div>
+        <div class="res-aside res-aside-l"><i class="bi bi-pencil"></i></div>
+        <div class="res-aside res-aside-r">{{ ratings[resource.id] }}</div>
+        <div class="res-keywords">
+            {% if keywords[resource.id] %}
+            {% for keyword in keywords[resource.id] %}
+            <p class="bubble">{{keyword}}</p>
+            {% endfor %}
+            {% else %}
+            <p class="res-no-key">No Keywords Generated</p>
+            {% endif %}
+        </div>
+    </div>
+    {% elif resource.type == "url" %}
+    <div class="res-wrapper" onclick="window.location.href='/resource/{{ resource.id }}'">
+        <div class="res-main word-break-all">
+            {{ resource.title }}
+        </div>
+        <div class="res-aside res-aside-l"><i class="bi bi-link-45deg"></i></div>
+        <div class="res-aside res-aside-r">{{ ratings[resource.id] }}</div>
+        <div class="res-keywords">
+            {% if keywords[resource.id] %}
+            {% for keyword in keywords[resource.id] %}
+            <p class="bubble">{{keyword}}</p>
+            {% endfor %}
+            {% else %}
+            <p class="res-no-key">No Keywords Generated</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}

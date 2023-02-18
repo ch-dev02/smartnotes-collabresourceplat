@@ -45,3 +45,10 @@ class CreateFolderForm(FlaskForm):
 
 class DelFolderForm(FlaskForm):
     folder_id = HiddenField('folder_id', validators=[DataRequired()])
+
+class NotesForm(FlaskForm):
+    title = StringField('title', validators=[DataRequired()])
+    notes = TextAreaField('notes')
+
+class DelResourceForm(FlaskForm):
+    resource_id = HiddenField('resource_id', validators=[DataRequired()])

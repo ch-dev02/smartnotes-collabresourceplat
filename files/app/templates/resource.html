@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>{{ resource.title }}</h1>
+    <p class="word-break-all"><a href="/group/{{group.id}}"><i>{{group.title}}</i></a> > <a
+        href="/folder/{{folder.id}}"><i>{{folder.title}}</i></a></p>
+    <p>{{rating}}</p>
+    {% if resource.type == "notes" and resource.creator == current_user.id %}
+    <input onclick="window.location.href='/edit_notes?id={{resource.id}}'" type="submit" class="btn btn-success col"
+        value="Edit">
+    {% elif resource.type == "material" or resource.type == "transcript" %}
+    <input onclick="window.location.href='/resource/download/{{resource.id}}'" type="submit" class="btn btn-success col"
+        value="Download">
+    {% endif %}
+    {% if group.owner == current_user.id or resource.creator == current_user.id %}
+    <form action="/resource/delete" method="post" name="delete" class="d-inline-block" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.resource_id }}
+        <input type="submit" class="btn btn-danger col" value="Delete">
+    </form>
+    {% endif %}
+    <br>
+    <hr>
+    {% if resource.type == "notes" %}
+    <textarea name="notes" id="notes">{{resource.data}}</textarea>
+    <br>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+    <script>
+        var simplemde = new SimpleMDE({
+            element: document.getElementById("notes"),
+            spellChecker: false,
+            toolbar: false,
+            status: false
+        });
+        simplemde.togglePreview();
+        $(".editor-preview img").replaceWith("<i><b>*Image Removed*</b></i>");
+        $(".editor-preview a").replaceWith("<i><b>*Link Removed*</b></i>");
+        setTimeout(function () {
+            var height = $(".editor-preview").prop("scrollHeight");
+            $(".CodeMirror-scroll").height(height);
+        }, 1000);
+        </script>
+    {% elif resource.type == "url" %}
+    <a class="word-break-all" href="{{resource.data}}">{{resource.data}}</a>
+    <p>* Always be careful clicking external links</p>
+    {% endif %}
+    {% if keywords %}
+    {% for keyword in keywords %}
+    <p class="bubble">{{keyword}}</p>
+    {% endfor %}
+    {% else %}
+    <p>No Keywords Generated</p>
+    {% endif %}
+    <hr>
+    <h4>Reviews</h4>
+    <p>To Be Implemented Later</p>
+</div>
+{% endblock %}
