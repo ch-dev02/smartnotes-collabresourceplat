@@ -224,6 +224,102 @@ def folder(id):
     return render_template('folder.html', folder=folder, owner=group.owner, form=form, group_title=group.title, group_id=group.id)
 
 """
+Add Lecture Material
+User must be logged in
+Get folder id as int and Check if folder exists
+ - if not warn and log then return to home page
+Check if parent group exists
+ - if not warn and log then return to home page
+Check if user is a member of parent group or the owner
+ - if not warn and log then return to home page
+GET request
+ - Render upload_material.html
+POST request and form validates
+ - Check if title is valid and not already in folder
+   - if not warn and log then return to folder page
+ - Check if file is valid
+   - if not warn and log then return to folder page
+ - If file with same name exists in folder
+   - Generate random string to prepend to filename
+ - Create Resource
+ - Redirect to folder page
+POST request and form doesn't validate
+ - warn user, log and redirect to folder page
+"""
+@app.route('/upload_material', methods=['GET', 'POST'])
+@login_required
+def upload_material():
+    form = UploadFileForm()
+    if request.args.get('folder') is None or not request.args.get('folder').isdigit():
+        flash('Invalid request', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add lecture material')
+        return redirect(url_for('index'))
+    id = int(request.args.get('folder'))
+    folder = models.Folder.query.filter_by(id=id).first()
+    if not folder:
+        flash('Folder doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add lecture material to invalid folder: ' + str(id))
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        flash('Folder\'s parent group doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add lecture material to folder in invalid group: ' + str(folder.group))
+        return redirect(url_for('index'))
+    member = models.Member.query.filter_by(user=current_user.id, group=group.id).first()
+    if group.owner != current_user.id and not member:
+        flash('You don\'t have permission to add to this folder', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to add lecture material to folder: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    if request.method == 'GET':
+        logger.info('User ' + current_user.email + ' accessed upload lecture material page for folder: ' + str(id))
+        return render_template('upload_file.html', form=form, title='Upload Lecture Material', action_url=url_for('upload_material', folder=id), form_name="upload_material", accepts=".pdf")
+    elif form.validate_on_submit():
+        title = html.escape(form.title.data.strip())
+        existing = models.Resource.query.filter_by(title=title, folder=id).first()
+        if title == '':
+            flash('Title cannot be empty', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture material')
+            return redirect(url_for('upload_material', folder=id))
+        if existing:
+            flash('Resource with that title already exists', 'danger')
+            logger.info('User ' + current_user.email + ' tried to add duplicate resource title to folder: ' + str(id))
+            return redirect(url_for('upload_material', folder=id))
+        if 'file' not in request.files:
+            flash('No file detected', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture material')
+            return redirect(url_for('upload_material', folder=id))
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file detected', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture material')
+            return redirect(url_for('upload_material', folder=id))
+        if file and allowed_file(file.filename, ['pdf']):
+            upfolder = "g" + str(group.id) + "f" + str(folder.id)
+            if not os.path.isdir(os.path.join(app.config['UPLOAD_FOLDER'], upfolder)):
+                os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], upfolder))
+            filename = secure_filename(file.filename)
+            rnd = ''
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], upfolder, filename)
+            while os.path.isfile(filepath):
+                rnd = secrets.token_urlsafe(8)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], upfolder, rnd+"_"+filename)
+            file.save(filepath)
+            # Create resource
+            resource = models.Resource(data=filepath, title=title, folder=id, creator=current_user.id, type="material")
+            db.session.add(resource)
+            db.session.commit()
+            flash("File uploaded", "success")
+            logger.info('User ' + current_user.email + ' uploaded lecture material ' + str(resource.id) + ' to folder ' + str(id))
+            return redirect(url_for('folder', id=id))
+        flash('Invalid file type', 'danger')
+        logger.info('User ' + current_user.email + ' tried to upload invalid file type to folder: ' + str(id))
+        return redirect(url_for('upload_material', folder=id))
+    else:
+        flash('Error uploading file', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to upload lecture material to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+
+"""
 Add notes page
 User must be logged in
 Folder id must be specified and validates
@@ -508,6 +604,42 @@ def resource(id):
     else:
         keywords = json.loads(dbKeywords.json)
     return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, keywords=keywords)
+
+"""
+Download specific resource
+User must be logged in
+Get Request Only
+Check if resource exists
+Check if folder exists
+Check if parent group exists
+Check if user has permission to download
+Download resource
+"""
+@app.route('/resource/download/<id>', methods=['GET'])
+@login_required
+def download_resource(id):
+    id = int(id)
+    resource = models.Resource.query.filter_by(id=id).first()
+    if not resource:
+        logger.info('User ' + current_user.email + ' sent invalid request to download resource ' + str(id))
+        flash("Invalid request", "danger")
+        return redirect(url_for('index'))
+    folder = models.Folder.query.filter_by(id=resource.folder).first()
+    if not folder:
+        logger.info('User ' + current_user.email + ' sent invalid request to download resource ' + str(id) + " with missing folder")
+        flash("Invalid request", "danger")
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        logger.info('User ' + current_user.email + ' sent invalid request to download resource ' + str(id) + " with missing group")
+        flash("Invalid request", "danger")
+        return redirect(url_for('index'))
+    if group.owner != current_user.id and not models.Member.query.filter_by(user=current_user.id, group=group.id).first():
+        logger.warning('User ' + current_user.email + ' tried to download resource without permission')
+        flash("You do not have permission to download this resource", "danger")
+        return redirect(url_for('index'))
+    logger.info('User ' + current_user.email + ' downloaded resource ' + str(id))
+    return send_file(resource.data[4:], as_attachment=True)
 
 """
 Delete specific resource

@@ -13,3 +13,6 @@ MAIL_USE_SSL = True
 
 WTF_CSRF_ENABLED = True
 SECRET_KEY = 'b4StrEde2N*WJx'
+
+MAX_CONTENT_LENGTH = 16 * 1000 * 1000
+UPLOAD_FOLDER = 'app/static/uploads'
