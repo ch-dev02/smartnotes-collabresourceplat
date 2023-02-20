@@ -320,6 +320,102 @@ def upload_material():
         return redirect(url_for('folder', id=id))
 
 """
+Add Lecture Transcript
+User must be logged in
+Get folder id as int and Check if folder exists
+ - if not warn and log then return to home page
+Check if parent group exists
+ - if not warn and log then return to home page
+Check if user is a member of parent group or the owner
+ - if not warn and log then return to home page
+GET request
+ - Render upload_transcript.html
+POST request and form validates
+ - Check if title is valid and not already in folder
+   - if not warn and log then return to folder page
+ - Check if file is valid
+   - if not warn and log then return to folder page
+ - If file with same name exists in folder
+   - Generate random string to prepend to filename
+ - Create Resource
+ - Redirect to folder page
+POST request and form doesn't validate
+ - warn user, log and redirect to folder page
+"""
+@app.route('/upload_transcript', methods=['GET', 'POST'])
+@login_required
+def upload_transcript():
+    form = UploadFileForm()
+    if request.args.get('folder') is None or not request.args.get('folder').isdigit():
+        flash('Invalid request', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add lecture transcript')
+        return redirect(url_for('index'))
+    id = int(request.args.get('folder'))
+    folder = models.Folder.query.filter_by(id=id).first()
+    if not folder:
+        flash('Folder doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add lecture transcript to invalid folder: ' + str(id))
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        flash('Folder\'s parent group doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add lecture transcript to folder in invalid group: ' + str(folder.group))
+        return redirect(url_for('index'))
+    member = models.Member.query.filter_by(user=current_user.id, group=group.id).first()
+    if group.owner != current_user.id and not member:
+        flash('You don\'t have permission to add to this folder', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to add lecture transcript to folder: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    if request.method == 'GET':
+        logger.info('User ' + current_user.email + ' accessed upload lecture transcript page for folder: ' + str(id))
+        return render_template('upload_file.html', form=form, title='Upload Lecture Transcript', action_url=url_for('upload_transcript', folder=id), form_name="upload_transcript", accepts=".txt, .vtt")
+    elif form.validate_on_submit():
+        title = html.escape(form.title.data.strip())
+        existing = models.Resource.query.filter_by(title=title, folder=id).first()
+        if title == '':
+            flash('Title cannot be empty', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture transcript')
+            return redirect(url_for('upload_transcript', folder=id))
+        if existing:
+            flash('Resource with that title already exists', 'danger')
+            logger.info('User ' + current_user.email + ' tried to add duplicate resource title to folder: ' + str(id))
+            return redirect(url_for('upload_transcript', folder=id))
+        if 'file' not in request.files:
+            flash('No file detected', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture transcript')
+            return redirect(url_for('upload_transcript', folder=id))
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file detected', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid request to add lecture transcript')
+            return redirect(url_for('upload_transcript', folder=id))
+        if file and allowed_file(file.filename, ['vtt', 'txt']):
+            upfolder = "g" + str(group.id) + "f" + str(folder.id)
+            if not os.path.isdir(os.path.join(app.config['UPLOAD_FOLDER'], upfolder)):
+                os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], upfolder))
+            filename = secure_filename(file.filename)
+            rnd = ''
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], upfolder, filename)
+            while os.path.isfile(filepath):
+                rnd = secrets.token_urlsafe(8)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], upfolder, rnd+"_"+filename)
+            file.save(filepath)
+            # Create resource
+            resource = models.Resource(data=filepath, title=title, folder=id, creator=current_user.id, type="transcript")
+            db.session.add(resource)
+            db.session.commit()
+            flash("File uploaded", "success")
+            logger.info('User ' + current_user.email + ' uploaded lecture transcript ' + str(resource.id) + ' to folder ' + str(id))
+            return redirect(url_for('folder', id=id))
+        flash('Invalid file type', 'danger')
+        logger.info('User ' + current_user.email + ' tried to upload invalid file type to folder: ' + str(id))
+        return redirect(url_for('upload_transcript', folder=id))
+    else:
+        flash('Error uploading file', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to upload lecture transcript to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+
+"""
 Add notes page
 User must be logged in
 Folder id must be specified and validates
