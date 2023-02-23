@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Add URL Resource</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/add_url?folder={{request.args.get('folder')}}" method="post" name="add_url" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.title(class_='form-control', placeholder='Resource Title') }}
+                <label for="title">Resource Title</label>
+            </div>
+            <br>
+            <div class="row form-floating">
+                {{ form.url(class_='form-control', placeholder='URL Link') }}
+                <label for="url">URL Link</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Add URL Resource">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -224,6 +224,80 @@ def folder(id):
     return render_template('folder.html', folder=folder, owner=group.owner, form=form, group_title=group.title, group_id=group.id)
 
 """
+Add URL Route
+User must be logged in
+Get folder id as int
+load form
+Check if folder exists
+ - if not warn and log then return to home page
+Check if parent group exists
+ - if not warn and log then return to home page
+Check if user is a member of parent group or the owner
+ - if not warn and log then return to home page
+GET request
+ - Render add_url.html
+POST request and form validates
+ - Check if URL is valid
+   - if not warn and log then return to folder page
+ - Check if URL is already in folder
+   - if so warn and log then return to folder page
+ - HTML escape title and URL
+ - Create Resource
+ - Redirect to folder page
+POST request and form doesn't validate
+ - warn user, log and redirect to folder page
+"""
+@app.route('/add_url', methods=['GET', 'POST'])
+@login_required
+def add_url():
+    if request.args.get('folder') is None or not request.args.get('folder').isdigit():
+        flash('Invalid request', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add URL')
+        return redirect(url_for('index'))
+    id = int(request.args.get('folder'))
+    form = AddURLForm()
+    folder = models.Folder.query.filter_by(id=id).first()
+    if not folder:
+        flash('Folder doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add URL to invalid folder: ' + str(id))
+        return redirect(url_for('index'))
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        flash('Folder\'s parent group doesn\'t exist', 'danger')
+        logger.info('User ' + current_user.email + ' tried to add URL to folder in invalid group: ' + str(folder.group))
+        return redirect(url_for('index'))
+    member = models.Member.query.filter_by(user=current_user.id, group=group.id).first()
+    if group.owner != current_user.id and not member:
+        flash('You don\'t have permission to add URLs to this folder', 'danger')
+        logger.warning('User ' + current_user.email + ' tried to add URL to folder: ' + str(id) + ' without permission')
+        return redirect(url_for('index'))
+    if request.method == 'GET':
+        logger.info('User ' + current_user.email + ' accessed add URL page for folder: ' + str(id))
+        return render_template('add_url.html', form=form)
+    elif form.validate_on_submit():
+        url = html.escape(form.url.data)
+        title = html.escape(form.title.data)
+        if not validators.url(url):
+            flash('Invalid URL', 'danger')
+            logger.info('User ' + current_user.email + ' sent invalid URL to add to folder: ' + str(id))
+            return redirect(url_for('folder', id=id))
+        resource = models.Resource.query.filter_by(data=url, folder=id).first()
+        if resource:
+            flash('URL already exists in folder', 'danger')
+            logger.info('User ' + current_user.email + ' tried to add duplicate URL to folder: ' + str(id))
+            return redirect(url_for('folder', id=id))
+        resource = models.Resource(data=url, title=title, folder=id, creator=current_user.id, type="url")
+        db.session.add(resource)
+        db.session.commit()
+        flash('URL added', 'success')
+        logger.info('User ' + current_user.email + ' added URL to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+    else:
+        flash('Error adding URL', 'danger')
+        logger.info('User ' + current_user.email + ' sent invalid request to add URL to folder: ' + str(id))
+        return redirect(url_for('folder', id=id))
+
+"""
 Add Lecture Material
 User must be logged in
 Get folder id as int and Check if folder exists

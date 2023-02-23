@@ -46,6 +46,10 @@ class CreateFolderForm(FlaskForm):
 class DelFolderForm(FlaskForm):
     folder_id = HiddenField('folder_id', validators=[DataRequired()])
 
+class AddURLForm(FlaskForm):
+    title = StringField('title', validators=[DataRequired()])
+    url = StringField('url', validators=[DataRequired()])
+
 class UploadFileForm(FlaskForm):
     title = StringField('title', validators=[DataRequired()])
     file = FileField('file', validators=[DataRequired()])
