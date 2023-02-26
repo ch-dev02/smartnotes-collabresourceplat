@@ -40,11 +40,6 @@ def logged_out_only(func):
             return func(*args, **kwargs)
     return wrap
 
-@app.route('/', methods=['GET'])
-@login_required
-def index():
-    return render_template('index.html')
-
 """
 Account Management Page
 Loads 2 Forms

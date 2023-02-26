@@ -164,3 +164,296 @@ nav {
 .form-check {
     margin: 20px 0;
 }
+
+/***** LIST ITEMS *****/
+.groups_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 10px;
+    width: 80%;
+    margin: 10px auto;
+}
+
+.folders_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 10px;
+    width: 100%;
+    margin: 10px auto;
+}
+
+.list-item {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;
+}
+
+.list-item>.list-item-btn {
+    background-color: #eee;
+    color: #2f2f2f;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    outline: none;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+.list-item>.list-item-btn:hover {
+    background-color: #ccc;
+}
+
+@media screen and (max-width: 450px) {
+    .groups_grid {
+        width: 100%;
+        display: block;
+    }
+
+    .folders_grid {
+        width: 100%;
+        display: block;
+    }
+}
+
+/***** TABS SYSTEM *****/
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, auto));
+}
+
+.tab button {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+}
+
+.tab button:hover {
+    background-color: #ddd;
+}
+
+.tab button.active {
+    background-color: #ccc;
+}
+
+.tabcontent {
+    display: none;
+    margin-top: 10px;
+}
+
+.tablinks:nth-of-type(1) {
+    border-right: 1px solid #ccc;
+}
+
+/***** FOLDER ADD DROPDOWN *****/
+.dropdown {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
+
+/***** RESOURCE BANNER *****/
+.res-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #cdcdcd;
+    cursor: pointer;
+}
+
+.res-wrapper:hover {
+    background-color: #e0e0e0;
+}
+
+.res-wrapper:nth-of-type(1) {
+    margin-top: 0;
+}
+
+.res-wrapper>* {
+    padding: 10px;
+    flex: 1 100%;
+}
+
+.res-main {
+    text-align: left;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+.res-aside-l {
+    font-size: x-large;
+}
+
+.res-aside-r {
+    font-size: large;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+.res-aside {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+@media all and (min-width: 600px) {
+    .res-aside {
+        flex: 1 0 0;
+    }
+
+    .res-aside-l {
+        border-right: 0px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .res-aside-l {
+        border-bottom: 1px solid #cdcdcd;
+    }
+}
+
+@media all and (min-width: 800px) {
+    .res-main {
+        flex: 5 0px;
+        order: 2;
+    }
+
+    .res-aside-l {
+        order: 1;
+    }
+
+    .res-aside-r {
+        order: 3;
+    }
+}
+
+@media all and (max-width: 800px) {
+    .res-main {
+        min-height: 40px;
+        text-align: center;
+        border-bottom: 1px solid #cdcdcd;
+    }
+
+    .res-aside {
+        min-height: 40px;
+    }
+
+    .res-aside-l {
+        border-right: 1px solid #cdcdcd;
+    }
+}
+
+.res-keywords {
+    order: 4;
+    border-top: 1px solid #cdcdcd;
+    background-color: #f9f9f9;
+}
+
+.res-no-key{
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+/***** RESOURCE LOADER *****/
+.loader {
+    margin: 20px auto;
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.loader div {
+    display: inline-block;
+    position: absolute;
+    left: 8px;
+    width: 16px;
+    background: rgba(0, 136, 169, 1);
+    animation: loader 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+
+.loader div:nth-child(1) {
+    left: 8px;
+    animation-delay: -0.24s;
+}
+
+.loader div:nth-child(2) {
+    left: 32px;
+    animation-delay: -0.12s;
+}
+
+.loader div:nth-child(3) {
+    left: 56px;
+    animation-delay: 0;
+}
+
+@keyframes loader {
+    0% {
+        top: 8px;
+        height: 64px;
+    }
+
+    50%,
+    100% {
+        top: 24px;
+        height: 32px;
+    }
+}
+
+/****** SAVE NOTES BUTTON ******/
+input[value="Save Notes"] {
+    max-width: 200px;
+}
+
+/**** CLASS TO SET WORD WRAP ****/
+.word-break-all {
+    word-break: break-all;
+}
+
+/***** KEYWORD LIST *****/
+.bubble{
+    display: inline-block;
+    margin: 2px 0;
+    background-color: #0088a9;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: smaller;
+}

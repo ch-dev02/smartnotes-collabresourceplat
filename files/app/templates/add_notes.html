@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Notes Editor</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-9">
+        <form action="/add_notes?folder={{request.args.get('folder')}}" method="post" name="add_notes"
+            enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.title(class_='form-control', placeholder='Notes Title') }}
+                <label for="title">Notes Title</label>
+            </div>
+            <br>
+            <div class="row form-floating">
+                {{ form.notes(class_='form-control', placeholder='Markdown Notes') }}
+            </div>
+            <p class="mb-0">* Images and URLs are forbidden and will not be available or rendered.</p>
+            <br>
+            <div class="row justify-content-end">
+                <input type="submit" class="btn btn-primary col" value="Save Notes">
+            </div>
+        </form>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>    
+    var simplemde = new SimpleMDE({
+        element: document.getElementById("notes"),
+        spellChecker: false,
+        {% if owner != current_user.id %}
+        autosave: {
+            enabled: true,
+            uniqueId: 'f{{request.args.get('folder')}}.u{{current_user.id}}',
+            delay: 1000,
+        },
+        {% endif %}
+        hideIcons: ["image", "link"]
+    });
+</script>
+{% endblock %}

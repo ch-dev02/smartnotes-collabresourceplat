@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="row justify-content-center">Join Group</h1>
+<br>
+<div class="row justify-content-md-center">
+    <div class="border rounded border-primary p-5 col-lg-4 auth-col-lg-4">
+        <form action="/join-group" method="post" name="join-group" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            <div class="row form-floating">
+                {{ form.code(class_='form-control', placeholder='Group Join Code') }}
+                <label for="code">Group Join Code</label>
+            </div>
+            <br>
+            <div class="row">
+                <input type="submit" class="btn btn-primary col" value="Join Group">
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
