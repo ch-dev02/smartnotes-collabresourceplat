@@ -1,7 +1,10 @@
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+if os.getenv("TESTING") is not None:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test.db')
+else:
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_TRACK_MODIFICATIONS = True    
 
 MAIL_SERVER='smtp.gmail.com'
@@ -16,3 +19,7 @@ SECRET_KEY = 'b4StrEde2N*WJx'
 
 MAX_CONTENT_LENGTH = 16 * 1000 * 1000
 UPLOAD_FOLDER = 'app/static/uploads'
+
+EXECUTOR_MAX_WORKERS = 1
+EXECUTOR_TYPE = 'thread'
+EXECUTOR_PROPAGATE_EXCEPTIONS = True

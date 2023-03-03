@@ -1,0 +1,1678 @@
+WEBVTT
+
+1
+00:01:00.780 --> 00:01:01.620
+Andrew Bulpitt: Okay, so.
+
+2
+00:01:03.600 --> 00:01:22.320
+Andrew Bulpitt: This is the last lecture on the machine learning material, I just want to try and tie together the stuff that we've been talking about on linear regression and how this links to the current trend in in neural networks.
+
+3
+00:01:24.120 --> 00:01:25.770
+Andrew Bulpitt: So a couple of things to finish off from the.
+
+4
+00:01:27.600 --> 00:01:33.120
+Andrew Bulpitt: linear regression and then we'll look at how this works with the neural networks.
+
+5
+00:01:36.300 --> 00:01:50.310
+Andrew Bulpitt: So last time we talked about discriminate functions and then he classifies we're trying to talking about partitioning feature spaces and being able to classify things based on which side of a discriminate function and.
+
+6
+00:01:51.330 --> 00:02:03.990
+Andrew Bulpitt: The the object lies Okay, we also talked about performance measures things like precision recall etc and looked at some of the pros and cons of those and what they'd be used for today just going to.
+
+7
+00:02:06.240 --> 00:02:07.080
+Andrew Bulpitt: follow up on that.
+
+8
+00:02:08.160 --> 00:02:10.830
+Andrew Bulpitt: linear classifier looking at logistic regression.
+
+9
+00:02:12.840 --> 00:02:23.070
+Andrew Bulpitt: give you an overview of how you actually do the optimization to find those discriminate functions Okay, or the regression functions, so you don't need to know.
+
+10
+00:02:26.310 --> 00:02:30.600
+Andrew Bulpitt: sort of math behind that but to have an overall understanding of what's going on.
+
+11
+00:02:31.950 --> 00:02:35.760
+Andrew Bulpitt: But I want to introduce you to some very simple neural model.
+
+12
+00:02:37.020 --> 00:02:42.900
+Andrew Bulpitt: So quick introduction system neuroscience and particularly a preceptor on which is fairly.
+
+13
+00:02:44.130 --> 00:02:51.090
+Andrew Bulpitt: Old concept now, but it is the building block of many of the deep data network, so you you'll come across.
+
+14
+00:02:52.440 --> 00:03:02.820
+Andrew Bulpitt: In the next few years and then find is looking at how you can connect these together into more complicated multi layer networks and how that relates to deep learning networks.
+
+15
+00:03:06.660 --> 00:03:11.190
+Andrew Bulpitt: Okay, so quick recap on what we were talking about last time, so we were talking about linear classifier.
+
+16
+00:03:12.240 --> 00:03:13.800
+Andrew Bulpitt: And we had some features which were.
+
+17
+00:03:14.940 --> 00:03:25.710
+Andrew Bulpitt: The inputs to to our regression model, remember, we talked about the the height and weight of characters or whether you could use pixels or whether you use particular words from a from a spam filter.
+
+18
+00:03:27.630 --> 00:03:36.270
+Andrew Bulpitt: Each feature had some kind of weight and it was changing those weights with change that discriminate function of that classify.
+
+19
+00:03:39.900 --> 00:03:40.650
+Andrew Bulpitt: And the sum.
+
+20
+00:03:42.690 --> 00:03:53.370
+Andrew Bulpitt: Of this is what's called the activation function, and you can see an equation, for it here okay well if you some the.
+
+21
+00:03:54.750 --> 00:04:09.420
+Andrew Bulpitt: The whites multiplied by the features particular input X Okay, then this will give us some kind of activation which relates to, if you remember, which side of the discriminate function.
+
+22
+00:04:11.940 --> 00:04:12.480
+Andrew Bulpitt: Your.
+
+23
+00:04:14.460 --> 00:04:15.690
+Andrew Bulpitt: example lies.
+
+24
+00:04:16.920 --> 00:04:29.100
+Andrew Bulpitt: So if the activation is positive it's on one side of the line negative, it was on the other side line here's just a programmatic representation of that where we've got some features Okay, the beach got a weight associated with.
+
+25
+00:04:30.270 --> 00:04:36.420
+Andrew Bulpitt: Okay, so remember this is controlling things like the gradient of those lines and some those together.
+
+26
+00:04:38.160 --> 00:04:45.240
+Andrew Bulpitt: For each feature, and then, if it's greater than zero it's in one class if it's less than zero cinder another class.
+
+27
+00:04:49.980 --> 00:04:52.620
+Andrew Bulpitt: Talk last time about.
+
+28
+00:04:53.640 --> 00:04:56.100
+Andrew Bulpitt: Some of the problems with this okay so some of the.
+
+29
+00:04:57.630 --> 00:05:10.050
+Andrew Bulpitt: objects that you want to classify what examples you want to classify will lie on the wrong side of the line, so you get some errors Okay, but also you get some which are very close to the line and then you're not so sure.
+
+30
+00:05:11.040 --> 00:05:23.340
+Andrew Bulpitt: Whether or not, they should be in one class or the other, and I said at the time ultimate some of this comes down to making probabilistic decisions or, which is the most likely class for this particular example.
+
+31
+00:05:24.690 --> 00:05:26.040
+Andrew Bulpitt: Okay, so we want to.
+
+32
+00:05:28.620 --> 00:05:30.120
+Andrew Bulpitt: Look at our activation function.
+
+33
+00:05:31.320 --> 00:05:31.830
+Andrew Bulpitt: and
+
+34
+00:05:33.840 --> 00:05:41.760
+Andrew Bulpitt: Think about what if that's a very positive number so much greater than zero Okay, so that would mean that we're.
+
+35
+00:05:43.200 --> 00:05:44.850
+Andrew Bulpitt: almost certain that this is.
+
+36
+00:05:45.870 --> 00:05:55.140
+Andrew Bulpitt: An example of a particular class Okay, so we want the sort of probability to go to one okay to say this is almost certainly at this particular class.
+
+37
+00:05:56.220 --> 00:06:01.890
+Andrew Bulpitt: If it was very negative Okay, we want the probability to go to zero so.
+
+38
+00:06:03.540 --> 00:06:18.420
+Andrew Bulpitt: we're certain that it's not a member of this class and this sort of relates to how far those examples live from that discussion that decision boundary and then we can do that using this type of function like a sigmoid function.
+
+39
+00:06:19.470 --> 00:06:19.740
+Andrew Bulpitt: Okay.
+
+40
+00:06:20.970 --> 00:06:34.500
+Andrew Bulpitt: Well, you can take your activation use exponents of that one over one plus E to the minus said was that is activation function and it looks something like this is kind of S sigmoid curve, that you can see here.
+
+41
+00:06:36.510 --> 00:06:41.640
+Andrew Bulpitt: So what you see is the probability increases rapidly when it's close to the line.
+
+42
+00:06:43.770 --> 00:06:53.340
+Andrew Bulpitt: And then it tells off at either end so you've got a probability of zero when it's very negative a probability of one when it's very positive and it and it changes.
+
+43
+00:06:54.990 --> 00:06:59.700
+Andrew Bulpitt: Rapidly between the two, but it gives us a nice continuous function that we can use.
+
+44
+00:07:07.830 --> 00:07:15.180
+Andrew Bulpitt: To, how do you choose those weights okay don't be don't be worried about the the mass here i'm not.
+
+45
+00:07:17.190 --> 00:07:19.710
+Andrew Bulpitt: asking you to fully understand this, but.
+
+46
+00:07:21.240 --> 00:07:30.930
+Andrew Bulpitt: Just to give you an idea of how this works you're going to look at it in far more detail next year Okay, so this comes down to a proper maximum likelihood estimation.
+
+47
+00:07:32.970 --> 00:07:41.010
+Andrew Bulpitt: So what we want to do is find the weights, which will maximize this function okay.
+
+48
+00:07:43.110 --> 00:07:43.560
+Andrew Bulpitt: and
+
+49
+00:07:45.120 --> 00:07:58.800
+Andrew Bulpitt: This is a some of the logs of the probabilities of your example belonging to a class why based on its inputs X and the values of the whites okay.
+
+50
+00:08:00.390 --> 00:08:01.020
+Andrew Bulpitt: And we got here.
+
+51
+00:08:03.510 --> 00:08:08.160
+Andrew Bulpitt: So, and those probabilities, so this is P, why given X.
+
+52
+00:08:09.390 --> 00:08:28.290
+Andrew Bulpitt: And, and the and wait to exhale your inputs are defined here as the sigmoid functions, because this is what you saw on the previous slide i've got one over one plus E to the minus, and this is our activation function, the wait times a features of our inputs X.
+
+53
+00:08:30.720 --> 00:08:38.280
+Andrew Bulpitt: So the principle is the principle of logistic regression here is to try and maximize.
+
+54
+00:08:40.440 --> 00:08:45.090
+Andrew Bulpitt: This probability Okay, so you want to change the weights to maximize this probably.
+
+55
+00:08:49.290 --> 00:08:49.950
+Andrew Bulpitt: That works for.
+
+56
+00:08:51.240 --> 00:08:53.010
+Andrew Bulpitt: Cases where we've got two classes.
+
+57
+00:08:54.270 --> 00:08:56.490
+Andrew Bulpitt: So it's just one or the other right.
+
+58
+00:08:57.840 --> 00:09:14.730
+Andrew Bulpitt: But what if we've got multiple classes and we talked about this briefly last time, where I had a feature space with a number of different classes of objects in it and we had to use multiple discriminate functions to be able to classify the different classes.
+
+59
+00:09:17.400 --> 00:09:30.660
+Andrew Bulpitt: We can do similar things here Okay, so if you if you've got multiple classes and what we have to do is multi class classification, or we have a weight vector for each class why, in this case.
+
+60
+00:09:32.310 --> 00:09:32.730
+Andrew Bulpitt: And then we.
+
+61
+00:09:33.750 --> 00:09:39.840
+Andrew Bulpitt: Have a score or access activation function for y, which is the weights times the.
+
+62
+00:09:40.860 --> 00:09:42.210
+Andrew Bulpitt: pH values of X.
+
+63
+00:09:44.970 --> 00:09:47.610
+Andrew Bulpitt: And then, what we want to do is.
+
+64
+00:09:48.990 --> 00:09:49.830
+Andrew Bulpitt: Find.
+
+65
+00:09:50.910 --> 00:09:59.820
+Andrew Bulpitt: The value of Y or the class which is which maximizes this function, so the way it's time to the.
+
+66
+00:10:01.080 --> 00:10:04.860
+Andrew Bulpitt: features here Okay, so if you do that for.
+
+67
+00:10:06.060 --> 00:10:10.170
+Andrew Bulpitt: to present your input you multiply that by.
+
+68
+00:10:12.030 --> 00:10:17.520
+Andrew Bulpitt: The white vectors for each of the classes, so if i've got four classes for white vectors.
+
+69
+00:10:19.140 --> 00:10:31.890
+Andrew Bulpitt: Omega 123 and four, for example, Okay, and you find out which one gives the highest output, for which one is why the maximum and that would tell us which class this.
+
+70
+00:10:32.910 --> 00:10:42.720
+Andrew Bulpitt: example belongs to dog on the right prices represent this case if you've got a if you can imagine a white vector in a.
+
+71
+00:10:43.560 --> 00:10:57.930
+Andrew Bulpitt: feature space shown by the bold arrows here so we've got a good one, two and three so we've got three classes here okay what we'd want to do is find out which one has the largest value that would suggest that this particular value.
+
+72
+00:10:58.980 --> 00:10:59.610
+Andrew Bulpitt: effects.
+
+73
+00:11:00.750 --> 00:11:04.470
+Andrew Bulpitt: This particular example belongs to that class.
+
+74
+00:11:08.880 --> 00:11:12.570
+Andrew Bulpitt: Again, we often want to use probabilities for this type of thing.
+
+75
+00:11:14.700 --> 00:11:21.510
+Andrew Bulpitt: And we can do that by converting the original activations that wanted to that three.
+
+76
+00:11:22.950 --> 00:11:30.360
+Andrew Bulpitt: into what's called soft Max activation right, where we have each of the said one over.
+
+77
+00:11:31.410 --> 00:11:33.930
+Andrew Bulpitt: One plus eat and said two plus eaters at three.
+
+78
+00:11:35.310 --> 00:11:47.850
+Andrew Bulpitt: And then we do the same thing for that, too, so i've got E to the zero to over he said one, but he said two three Okay, and similarly for the third activations at three.
+
+79
+00:11:49.380 --> 00:11:51.240
+Andrew Bulpitt: So this gives us three.
+
+80
+00:11:53.130 --> 00:11:54.750
+Andrew Bulpitt: different functions.
+
+81
+00:12:02.370 --> 00:12:02.850
+Andrew Bulpitt: and
+
+82
+00:12:05.580 --> 00:12:06.420
+Andrew Bulpitt: We have the same.
+
+83
+00:12:07.860 --> 00:12:24.420
+Andrew Bulpitt: same approaches before if we want to try and find what the best weights are for this multi class problem Okay, then we've got a multi class logistic regression problem again you're going to look at this far more detail, next year, but it again comes down to this maximum likelihood.
+
+84
+00:12:25.650 --> 00:12:37.380
+Andrew Bulpitt: estimation, so you want to find the set of weights and we go which maximize this function in this case we have to some those over all the possible.
+
+85
+00:12:38.400 --> 00:12:42.810
+Andrew Bulpitt: classes, because got multiple classes here Okay, so this time was something over I.
+
+86
+00:12:50.580 --> 00:12:51.210
+Andrew Bulpitt: What does that.
+
+87
+00:12:52.350 --> 00:12:55.290
+Andrew Bulpitt: optimisation look like to try and find.
+
+88
+00:12:56.820 --> 00:12:58.800
+Andrew Bulpitt: Our weights okay.
+
+89
+00:13:01.320 --> 00:13:07.650
+Andrew Bulpitt: So what we want to do is we're trying to maximize this function, so do yoga here.
+
+90
+00:13:08.790 --> 00:13:09.150
+Okay.
+
+91
+00:13:11.460 --> 00:13:14.490
+Andrew Bulpitt: And you can imagine that that varies according to this.
+
+92
+00:13:16.830 --> 00:13:29.940
+Andrew Bulpitt: pink line here Okay, according to the values of the weights okay so as they increase, you can see how the value of that function dw changes.
+
+93
+00:13:31.110 --> 00:13:39.090
+Andrew Bulpitt: And our task here, we said was to find the maximum likelihood therefore we're trying to maximize his family, so we want to try and find the value of Omega that.
+
+94
+00:13:40.290 --> 00:13:44.100
+Andrew Bulpitt: corresponds to the peak value of.
+
+95
+00:13:45.210 --> 00:13:45.810
+Andrew Bulpitt: g here.
+
+96
+00:13:48.120 --> 00:13:55.830
+Andrew Bulpitt: So let's say I randomly initialize my weights to Omega zero here Okay, then i've got I can compute my.
+
+97
+00:13:57.300 --> 00:14:03.510
+Andrew Bulpitt: My function G and zero Okay, and that gives us this point on the.
+
+98
+00:14:04.740 --> 00:14:05.460
+Andrew Bulpitt: On the.
+
+99
+00:14:06.510 --> 00:14:13.770
+Andrew Bulpitt: On the function Okay, and now i've got to decide how do I how am I going to change those weights in order to maximize this function.
+
+100
+00:14:16.050 --> 00:14:19.800
+Andrew Bulpitt: So i've got a choice here, I can either decrease the values of.
+
+101
+00:14:20.910 --> 00:14:27.210
+Andrew Bulpitt: The weights, or I could increase them and that will move me left and right along this function.
+
+102
+00:14:28.980 --> 00:14:47.460
+Andrew Bulpitt: Okay, so I can evaluate what would it look like, if I add on a particular value of age, what will it look like, if I subtract a particular value of H off of my weight yeah Okay, and then the step it in the in the best direction to find the one that increases G OK and.
+
+103
+00:14:48.600 --> 00:14:55.320
+Andrew Bulpitt: and select that and that will move me along that function and so like i've moved a distance, plus h.
+
+104
+00:14:56.760 --> 00:15:05.820
+Andrew Bulpitt: And then, what I can do is do the same thing again and keep repeating that so when you're different point on on the on the function again look at.
+
+105
+00:15:06.300 --> 00:15:16.170
+Andrew Bulpitt: What will happen to G if I increase or decrease the value of the weight pick the one that will increase the value of G, so you can do this, typically.
+
+106
+00:15:21.750 --> 00:15:22.710
+Andrew Bulpitt: The way this is done.
+
+107
+00:15:24.030 --> 00:15:27.630
+Andrew Bulpitt: In practice, again don't worry about the math here okay.
+
+108
+00:15:29.580 --> 00:15:31.590
+Andrew Bulpitt: But it's done by looking at the gradient.
+
+109
+00:15:32.730 --> 00:15:37.500
+Andrew Bulpitt: Of the function okay so delta G over delta Omega.
+
+110
+00:15:38.880 --> 00:15:39.360
+Andrew Bulpitt: Six is.
+
+111
+00:15:40.860 --> 00:15:44.730
+Andrew Bulpitt: Looking at the gradient determines which has.
+
+112
+00:15:45.870 --> 00:15:54.690
+Andrew Bulpitt: The best gradient the one going upwards, and perhaps at the fastest rate Okay, so we evaluate the gradient all this derivative.
+
+113
+00:15:55.260 --> 00:16:08.580
+Andrew Bulpitt: And that will tell us which direction to step in to okay so find the positive gradient the one that will take me to a higher value of the optimization function, and I would then move in that direction.
+
+114
+00:16:09.870 --> 00:16:11.610
+Andrew Bulpitt: And that's the principle of.
+
+115
+00:16:15.780 --> 00:16:20.190
+Andrew Bulpitt: optimizing these functions for logistic regression.
+
+116
+00:16:25.020 --> 00:16:36.870
+Andrew Bulpitt: In one day it's about changing one one weight so adding or subtracting a value to our weight if you've got two weights, then you have a two dimensional surface.
+
+117
+00:16:37.680 --> 00:16:44.040
+Andrew Bulpitt: Right and your task here is to try and get to to the peak of that surface, so you might start off at any point.
+
+118
+00:16:44.580 --> 00:16:53.460
+Andrew Bulpitt: around this surface and what you want to do is find out which direction you need to go in to reach the peak of that surface and, obviously, as you add more weights this becomes.
+
+119
+00:16:53.910 --> 00:17:10.170
+Andrew Bulpitt: A much higher dimensional surface and it's very hard for us to try and visualize but our optimization algorithms are still able to compute these derivatives or these gradients in high dimensional spaces determine which direction to move in.
+
+120
+00:17:11.730 --> 00:17:13.140
+Andrew Bulpitt: OK, so the principle here is.
+
+121
+00:17:15.270 --> 00:17:22.980
+Andrew Bulpitt: it's all about optimizing function or color gradient descent okay so trying to to climb up a gradient.
+
+122
+00:17:25.200 --> 00:17:45.420
+Andrew Bulpitt: So we want to perform an update on our weights in an uphill direction for each of our coordinates to each of our examples that we give our algorithm the steeper the slope I, the higher the derivative you remember gradients can be computed by taking derivatives.
+
+123
+00:17:46.650 --> 00:17:49.410
+Andrew Bulpitt: The bigger the step for that particular coordinate.
+
+124
+00:17:51.240 --> 00:17:58.170
+Andrew Bulpitt: And these are just equations showing that those sorts of updates Okay, so I start with.
+
+125
+00:17:59.310 --> 00:18:02.160
+Andrew Bulpitt: Omega one is my initial weight and I add to that.
+
+126
+00:18:05.730 --> 00:18:07.410
+Andrew Bulpitt: A value proportional to.
+
+127
+00:18:10.650 --> 00:18:11.160
+Andrew Bulpitt: The gradient.
+
+128
+00:18:13.260 --> 00:18:26.730
+Andrew Bulpitt: With respect to go one, and for me to do the same thing calculate the gradient specter and we get to, and I can add a function of that gradient to my weights.
+
+129
+00:18:29.490 --> 00:18:39.150
+Andrew Bulpitt: And we can write the same thing in terms of effects and okay if you're interested in the course, this is the sort of the way that you implement this to make it efficient by using vector notations.
+
+130
+00:18:39.660 --> 00:18:51.960
+Andrew Bulpitt: Right, so we have a vector which determines the gradient with respect to each of the weights right, and then we can update all of our weights and it's a function of that gradient vector.
+
+131
+00:18:54.270 --> 00:19:05.130
+Andrew Bulpitt: So the important thing here is just to think about as this hill climbing algorithm right to your initial values of your weights of your skin function, the aggression function.
+
+132
+00:19:06.420 --> 00:19:08.760
+Andrew Bulpitt: puts you somewhere on the surface.
+
+133
+00:19:10.500 --> 00:19:11.970
+Andrew Bulpitt: And what you want to do is determine.
+
+134
+00:19:13.170 --> 00:19:20.550
+Andrew Bulpitt: How can you change those values as weights to optimize that function, the idea is you want to move up hill to increase the value of that function.
+
+135
+00:19:21.690 --> 00:19:27.810
+Andrew Bulpitt: And we determine the gradients with respect to each of those weights, to determine which direction to move in.
+
+136
+00:19:31.290 --> 00:19:34.230
+Andrew Bulpitt: Alright, so those sorts of techniques have been around a very long time.
+
+137
+00:19:35.520 --> 00:19:42.840
+Andrew Bulpitt: and your networks okay these deep learning networks, use the same kind of approach.
+
+138
+00:19:44.850 --> 00:19:47.220
+Andrew Bulpitt: So just want to say a little bit about.
+
+139
+00:19:48.420 --> 00:19:54.120
+Andrew Bulpitt: Some background into that Okay, and how we create a simple model of a neuron and then.
+
+140
+00:19:55.470 --> 00:20:01.980
+Andrew Bulpitt: How that relates to the linear regression or the logistic regression that we've been talking about.
+
+141
+00:20:06.060 --> 00:20:15.450
+Andrew Bulpitt: So these sorts of classic patent references techniques have a very long history and condemning straight success in many different domains.
+
+142
+00:20:17.340 --> 00:20:28.050
+Andrew Bulpitt: But they're often very special purpose in nature okay and require an awful lot of computing power so people spent a lot of time designing particular features.
+
+143
+00:20:29.250 --> 00:20:31.200
+Andrew Bulpitt: elaborate pattern recognition techniques.
+
+144
+00:20:33.510 --> 00:20:38.280
+Andrew Bulpitt: And they can work to a limited extent, but they're not very good at generalizing two different problems.
+
+145
+00:20:40.470 --> 00:20:40.890
+Andrew Bulpitt: So.
+
+146
+00:20:42.150 --> 00:20:56.760
+Andrew Bulpitt: We can improve our technology and will continue to do so more parallel computing new algorithms Okay, though, improve the performance but human performance is often better for many, many tasks.
+
+147
+00:21:01.260 --> 00:21:16.290
+Andrew Bulpitt: mainly because we're better at looking at data that we that we've not seen before okay and generalizing what we know from other problems and applying it to new problems, and this is the type of thing that classical patent mission mission techniques find particularly hard.
+
+148
+00:21:18.570 --> 00:21:35.070
+Andrew Bulpitt: So, because of that lot lots of efforts been put into trying to model, the brain a lot electronically Okay, and we can we can build some pretty simple models, but there's still so much we don't really understand and there's other natural approaches that people take simulators kneeling.
+
+149
+00:21:36.810 --> 00:21:38.550
+Andrew Bulpitt: uses ideas from.
+
+150
+00:21:42.300 --> 00:21:55.380
+Andrew Bulpitt: melting substances at different temperatures and genetic algorithms that try and look at the ideas of making new tech mutations to your your way to say and crossing over different.
+
+151
+00:21:56.400 --> 00:22:01.290
+Andrew Bulpitt: variations of these weights at, as happens in genetics, to try and create new.
+
+152
+00:22:03.420 --> 00:22:09.000
+Andrew Bulpitt: New examples to optimize our function okay so there's a number of different approaches out there.
+
+153
+00:22:13.320 --> 00:22:14.820
+Andrew Bulpitt: So one of the big differences.
+
+154
+00:22:16.140 --> 00:22:21.720
+Andrew Bulpitt: about the sorts of models that we've historically been building and the human brain is.
+
+155
+00:22:22.800 --> 00:22:25.590
+Andrew Bulpitt: The massive scale of the human brain Okay, so it.
+
+156
+00:22:26.640 --> 00:22:41.730
+Andrew Bulpitt: consists of something like 10 to the 11 to 10 to the 13 neurons okay what's interesting about them is that they are actually fairly simple Okay, they respond cheverly under a lot of input conditions.
+
+157
+00:22:42.750 --> 00:22:50.460
+Andrew Bulpitt: But each neuron can be connected to something like 10 to the four others right and that's a big difference between.
+
+158
+00:22:52.710 --> 00:22:56.790
+Andrew Bulpitt: The sorts of models that we currently create and.
+
+159
+00:22:59.100 --> 00:22:59.730
+Andrew Bulpitt: And the brain.
+
+160
+00:23:06.120 --> 00:23:07.890
+Andrew Bulpitt: i'm sure some of you remember this from.
+
+161
+00:23:09.000 --> 00:23:17.850
+Andrew Bulpitt: GCSE biology, if you took that but a very basic structure of a of a neuron is that it has a cell body this soma.
+
+162
+00:23:20.490 --> 00:23:26.220
+Andrew Bulpitt: soma receives many inputs fire different dendrites moving into.
+
+163
+00:23:27.900 --> 00:23:33.270
+Andrew Bulpitt: that feed into this so Okay, and then you have an output from your cell body.
+
+164
+00:23:34.290 --> 00:23:44.790
+Andrew Bulpitt: Which is bad it's axon today, so these dendrites are coming from other neurons Okay, and the axon links to two other neurons.
+
+165
+00:23:46.380 --> 00:23:57.150
+Andrew Bulpitt: That accident fragments into many different outputs these envelopes that connect to other neurons are these things, called signups, as you can see it in the bottom here okay.
+
+166
+00:23:57.810 --> 00:24:15.090
+Andrew Bulpitt: There isn't actually a physical connection to such there's some kind of chemical process between the axon of one year on, and the dendrites have another in this signups which controls, how the messages are passed between the different neurons.
+
+167
+00:24:23.430 --> 00:24:29.040
+Andrew Bulpitt: What happens is you get a passing of activity among all those dendrites okay they're feeding into the cell body.
+
+168
+00:24:30.120 --> 00:24:35.730
+Andrew Bulpitt: And that may cause the neurons to fire so by fire, I mean some electro chemical effect.
+
+169
+00:24:37.290 --> 00:24:45.180
+Andrew Bulpitt: Then this produces an activity along the axon may then cross signups is to other neurons Okay, but that's all about.
+
+170
+00:24:46.590 --> 00:24:49.440
+Andrew Bulpitt: That to a chemical effect in the in the signups.
+
+171
+00:24:51.390 --> 00:25:02.370
+Andrew Bulpitt: And it can be that this is a solitary so one neuron firing causes other neurons to fire, it could be that one neuron firing will stop other neurons firing.
+
+172
+00:25:05.040 --> 00:25:11.010
+Andrew Bulpitt: So it's all caused by the movement that binds Okay, and last, less than a millisecond for a new to fire.
+
+173
+00:25:12.180 --> 00:25:15.690
+Andrew Bulpitt: what's quite interesting is that neurons only 500 times per second.
+
+174
+00:25:16.950 --> 00:25:26.130
+Andrew Bulpitt: Okay, so we have in the brain is a massive interconnected set of simple slow processes.
+
+175
+00:25:27.360 --> 00:25:36.240
+Andrew Bulpitt: To week certainly do better than doing something 100 times per second Okay, but what we don't have is this massive interconnection of neurons.
+
+176
+00:25:47.310 --> 00:25:48.630
+Andrew Bulpitt: what's The effect of this.
+
+177
+00:25:53.670 --> 00:26:02.430
+Andrew Bulpitt: what's been found is that concepts are distributed across this array of neurons can you can't explicitly locate things so you often.
+
+178
+00:26:05.670 --> 00:26:06.450
+Andrew Bulpitt: So you can't.
+
+179
+00:26:08.040 --> 00:26:12.030
+Andrew Bulpitt: find a neuron which explains a particular concept.
+
+180
+00:26:13.110 --> 00:26:20.070
+Andrew Bulpitt: Okay, so a memory or concept is represented by a pattern of activity across the brain.
+
+181
+00:26:24.300 --> 00:26:28.920
+Andrew Bulpitt: we've learned that learning seems to be governed by the changes in those signups it's.
+
+182
+00:26:30.060 --> 00:26:32.790
+Andrew Bulpitt: So it's not that neurons grow.
+
+183
+00:26:35.070 --> 00:26:56.520
+Andrew Bulpitt: New axons or the new dendrites Okay, but that the connections between them change okay and it's about the strength of that connection, which determines whether or not a neuron will fire when the axon of a previous neuron fires.
+
+184
+00:26:59.700 --> 00:27:07.110
+Andrew Bulpitt: And people have been studying this for many, many years so there's something known as heavy in earnings 1949.
+
+185
+00:27:10.170 --> 00:27:16.410
+Andrew Bulpitt: They found that there seems to be a reinforcement of good behavior and inhibition of bad behavior so.
+
+186
+00:27:17.610 --> 00:27:18.570
+Andrew Bulpitt: If you keep giving.
+
+187
+00:27:19.590 --> 00:27:22.890
+Andrew Bulpitt: positive examples and then the strengths between these.
+
+188
+00:27:24.540 --> 00:27:27.750
+Andrew Bulpitt: neurons will grow stronger okay and.
+
+189
+00:27:28.860 --> 00:27:29.100
+Andrew Bulpitt: In.
+
+190
+00:27:32.040 --> 00:27:35.730
+Andrew Bulpitt: For bad examples, the strength of the connection gets weaker.
+
+191
+00:27:39.240 --> 00:27:41.970
+Andrew Bulpitt: And our modern machine learning algorithms on on.
+
+192
+00:27:43.230 --> 00:27:51.720
+Andrew Bulpitt: The networks work along the same kind of principles okay this this idea of.
+
+193
+00:27:54.210 --> 00:27:59.640
+Andrew Bulpitt: gradient descent, etc, is this a similar kind of idea we're trying to optimize a function.
+
+194
+00:28:01.110 --> 00:28:05.490
+Andrew Bulpitt: And these neurons are trying to do the same thing.
+
+195
+00:28:07.020 --> 00:28:11.460
+Andrew Bulpitt: So the effects of this massive connection is that one idea.
+
+196
+00:28:12.630 --> 00:28:18.450
+Andrew Bulpitt: sort of one patent of neurons firing can cause others to fire or provoke others to fire.
+
+197
+00:28:19.470 --> 00:28:19.770
+Andrew Bulpitt: Okay.
+
+198
+00:28:21.540 --> 00:28:22.680
+Andrew Bulpitt: And what you find is that.
+
+199
+00:28:24.060 --> 00:28:37.500
+Andrew Bulpitt: two ideas have much of the neural activity in common okay so she got one concept onset onset of activations in your neurons that can often cause another set of neurons start to fire Okay, this is obviously something that.
+
+200
+00:28:38.250 --> 00:28:43.530
+Andrew Bulpitt: Humans are good at when we have one idea or see one pattern, this can.
+
+201
+00:28:44.610 --> 00:28:45.750
+Andrew Bulpitt: cause us to think about.
+
+202
+00:28:46.920 --> 00:28:51.270
+Andrew Bulpitt: Other similar patterns Okay, or have other ideas related to the first idea.
+
+203
+00:28:53.610 --> 00:28:59.550
+Andrew Bulpitt: This massive parallelism or interconnection between neurons.
+
+204
+00:29:03.690 --> 00:29:08.880
+Andrew Bulpitt: enables it to have a great resilience to get some damage, so if you lose a few neurons.
+
+205
+00:29:11.310 --> 00:29:12.750
+Andrew Bulpitt: or a few dendrites.
+
+206
+00:29:14.400 --> 00:29:15.300
+Andrew Bulpitt: You can still.
+
+207
+00:29:16.530 --> 00:29:18.690
+Andrew Bulpitt: collect a concept or a memory.
+
+208
+00:29:19.890 --> 00:29:28.950
+Andrew Bulpitt: So it's very good at recognizing that we are very good at recognizing partial path again sort of thing but traditional.
+
+209
+00:29:30.210 --> 00:29:38.130
+Andrew Bulpitt: pattern recognition schemes have great difficulty with that idea of association one object to another one idea to another.
+
+210
+00:29:39.900 --> 00:29:49.830
+Andrew Bulpitt: And also, this sort of resilience this damage resistance, so we, we can develop a pattern recognition algorithms that are very good at recognizing faces, for example.
+
+211
+00:29:50.700 --> 00:29:57.270
+Andrew Bulpitt: But they have much more trouble with recognizing partial patents, whereas you and I are actually very good at this type of thing.
+
+212
+00:30:05.040 --> 00:30:06.000
+Andrew Bulpitt: Okay, so.
+
+213
+00:30:08.490 --> 00:30:13.920
+Andrew Bulpitt: Welcome pits came up with a very simple model of a neuron okay.
+
+214
+00:30:15.900 --> 00:30:25.650
+Andrew Bulpitt: So this is just a two state processor it generates 01 as an output Okay, in response to its inputs why.
+
+215
+00:30:27.990 --> 00:30:28.710
+Andrew Bulpitt: Okay, and i've got.
+
+216
+00:30:29.760 --> 00:30:42.480
+Andrew Bulpitt: can have any number of inputs here and I played with them why wouldn't why no Okay, and these are represented team those den drives are going into the cell body so on the diagram on the right, you can see the inputs why wanted.
+
+217
+00:30:43.620 --> 00:30:50.760
+Andrew Bulpitt: To y en Okay, and they go into the cell body which is like the blue circle here Okay, and the axon is like the output.
+
+218
+00:30:52.830 --> 00:31:10.770
+Andrew Bulpitt: The synaptic junctions the connections between my inputs why one and myself body are modeled by attaching weights, to the inputs so inside each of these inputs as there's a weight associated with it.
+
+219
+00:31:15.480 --> 00:31:38.520
+Andrew Bulpitt: And then I can calculate a total input from my cell body based on summing up the all of my inputs multiplied by each of their weights Okay, and something that all the inputs to my to myself right, and so this is the same as a function that we were looking at for our regression.
+
+220
+00:31:39.810 --> 00:31:44.760
+Andrew Bulpitt: discriminate functions So hopefully you recognize it so it's the same it's the same idea.
+
+221
+00:31:45.840 --> 00:31:48.480
+Andrew Bulpitt: And this very simple new model is doing the same thing.
+
+222
+00:31:49.620 --> 00:31:58.380
+Andrew Bulpitt: Okay, the output is in some function of the input, this is our transfer activation function and, in many cases, people use.
+
+223
+00:31:59.550 --> 00:32:09.660
+Andrew Bulpitt: sigmoid function to that we've looked at as the the transfer or intubation function, so the output will fire one if the inputs go.
+
+224
+00:32:11.310 --> 00:32:15.930
+Andrew Bulpitt: above a certain threshold and will the neuron won't fire if the inputs.
+
+225
+00:32:17.070 --> 00:32:20.550
+Andrew Bulpitt: remain a certain threshold below a certain threshold sorry.
+
+226
+00:32:26.880 --> 00:32:34.350
+Andrew Bulpitt: And you can see that here so you've got some transfer function F of X, it could be a sigmoid any monotonic increasing function.
+
+227
+00:32:35.310 --> 00:32:52.530
+Andrew Bulpitt: In the very simplest case that would just be a threshold so X is greater than some value theater, then the output of the new on would be one effects is less than we could see each other in the output of the new would be Sierra.
+
+228
+00:32:55.830 --> 00:33:13.770
+Andrew Bulpitt: And Omega sorry theater it's a parameter of of the neuron right which we can actually represent as another input Okay, where we have the value of the input as one and theater is treated like a weight Okay, and we can build that then into our activation function.
+
+229
+00:33:16.380 --> 00:33:24.900
+Andrew Bulpitt: Think back to our discriminate functions right and what this is doing is the same as our discriminate function, so if X is.
+
+230
+00:33:25.350 --> 00:33:36.570
+Andrew Bulpitt: above a certain threshold, this is basically saying the example lies on one side of our discriminate function if it's less than or equal defeated then it's, on the other side of our disagreement function.
+
+231
+00:33:47.550 --> 00:34:00.480
+Andrew Bulpitt: What we can start to do is to connect lots of these simple perceptions together Okay, so we have a number of neurons people want pm, and then we have a matrix of weights.
+
+232
+00:34:02.610 --> 00:34:09.600
+Andrew Bulpitt: w J Omega Jay was saying that this is the weight between perception I and.
+
+233
+00:34:11.520 --> 00:34:16.620
+Andrew Bulpitt: input J fruit, for example, of of another perception on Europe.
+
+234
+00:34:20.670 --> 00:34:26.790
+Andrew Bulpitt: By incorporating sita as another input okay ah.
+
+235
+00:34:29.640 --> 00:34:35.220
+Andrew Bulpitt: activation function now X is equal to the sum of all the inputs of.
+
+236
+00:34:37.080 --> 00:34:42.870
+Andrew Bulpitt: wi J times, why I minus seated Jay.
+
+237
+00:34:46.080 --> 00:34:49.380
+Andrew Bulpitt: This is the total activation for.
+
+238
+00:34:50.400 --> 00:34:54.660
+Andrew Bulpitt: neuron J okay something over all the inputs I to that neuron.
+
+239
+00:34:58.560 --> 00:35:04.320
+Andrew Bulpitt: And then my output is my function of that which could be that threshold, it could be a sigmoid exam.
+
+240
+00:35:15.930 --> 00:35:18.630
+Andrew Bulpitt: To the question now is how do we learn.
+
+241
+00:35:20.820 --> 00:35:22.170
+Andrew Bulpitt: The values of our weights.
+
+242
+00:35:23.400 --> 00:35:31.710
+Andrew Bulpitt: So what you see on this slide within this function is how this is the same as our linear progression or logistic regression okay well.
+
+243
+00:35:33.000 --> 00:35:45.300
+Andrew Bulpitt: How do we learn those weights right and we can use similar ideas to the ones we discussed the idea, this idea of gradient descent or in many cases gradient descent, where you try and minimize a function.
+
+244
+00:35:47.910 --> 00:35:48.480
+Andrew Bulpitt: So.
+
+245
+00:35:50.070 --> 00:36:07.620
+Andrew Bulpitt: It wasn't like back in 1958 so long time ago now started to incorporate learning Okay, by introducing adaptive weights around the new on having a particular value w you can change the value of w to allow the neurons to learn.
+
+246
+00:36:09.510 --> 00:36:11.220
+Andrew Bulpitt: So the same simple processes.
+
+247
+00:36:12.540 --> 00:36:21.840
+Andrew Bulpitt: Just any input and one output, with an activity that will have zero or one so it's just a binary decision it does or doesn't belong to a particular class it.
+
+248
+00:36:23.520 --> 00:36:25.260
+Andrew Bulpitt: The neuron does or doesn't fire.
+
+249
+00:36:28.500 --> 00:36:42.300
+Andrew Bulpitt: Given a population of n bit patents to be classified into categories A and B, we can present an input of an input patent and classify it as a if the output is zero and be if it is one.
+
+250
+00:36:43.530 --> 00:36:46.860
+Andrew Bulpitt: that's exactly what we were doing without discriminate functions.
+
+251
+00:36:50.910 --> 00:36:59.310
+Andrew Bulpitt: If our weights are just random at the start it's not going to behave the way that we want is it that's that remember that's a random placement that discriminate function.
+
+252
+00:37:00.330 --> 00:37:05.970
+Andrew Bulpitt: In our feature space and what we want to do is to be able to move and rotate that discriminate function.
+
+253
+00:37:07.260 --> 00:37:11.340
+Andrew Bulpitt: Okay, to petition our data into two classes.
+
+254
+00:37:13.770 --> 00:37:25.170
+Andrew Bulpitt: So the idea here is that you, you can start off with random weights, but then you need to train it using a training set of known data, so you present it with an example and you tell it.
+
+255
+00:37:26.190 --> 00:37:31.560
+Andrew Bulpitt: Whether the output of the neuron should be zero or one should be class a class pay for example.
+
+256
+00:37:34.350 --> 00:37:37.380
+Andrew Bulpitt: And if the neuron is currently giving the wrong response.
+
+257
+00:37:39.000 --> 00:37:51.750
+Andrew Bulpitt: Then you can adjust the weights Okay, so this is the idea that corresponds to the synaptic junction so we changing our values of our whites while values of us an uptick junctions so.
+
+258
+00:37:52.830 --> 00:37:54.750
+Andrew Bulpitt: That john is learning.
+
+259
+00:38:00.210 --> 00:38:02.310
+Andrew Bulpitt: And the initial perceptual learning rule.
+
+260
+00:38:04.470 --> 00:38:08.250
+Andrew Bulpitt: was very simple Okay, we start off with some random weights.
+
+261
+00:38:10.500 --> 00:38:11.550
+Andrew Bulpitt: So in this case.
+
+262
+00:38:13.560 --> 00:38:18.240
+Andrew Bulpitt: We 02 w n Okay, and for each input.
+
+263
+00:38:20.790 --> 00:38:21.180
+Andrew Bulpitt: We.
+
+264
+00:38:22.650 --> 00:38:26.010
+Andrew Bulpitt: calculate our total input so that's that.
+
+265
+00:38:27.030 --> 00:38:30.840
+Andrew Bulpitt: summation of the weights times the input so here w.
+
+266
+00:38:32.640 --> 00:38:34.650
+Andrew Bulpitt: Zero is our.
+
+267
+00:38:35.880 --> 00:38:45.330
+Andrew Bulpitt: Our value of theater okay often known as the bias Okay, so in this case, what we've got is an input of one going through a way to filter.
+
+268
+00:38:46.440 --> 00:38:55.380
+Andrew Bulpitt: which gets in your bias or theater but what's so you take each input multiply it by the white lies in that input.
+
+269
+00:38:58.470 --> 00:39:00.300
+Andrew Bulpitt: Set the output to one if.
+
+270
+00:39:02.580 --> 00:39:08.460
+Andrew Bulpitt: Total input is graded and zero otherwise you set the output to zero.
+
+271
+00:39:10.260 --> 00:39:20.310
+Andrew Bulpitt: Okay, so, then you can compare the output to the expected output remember we've got this training set for each set of inputs, we know whether than you are on should be.
+
+272
+00:39:22.140 --> 00:39:23.580
+Andrew Bulpitt: Producing a one or a zero.
+
+273
+00:39:24.810 --> 00:39:26.940
+Andrew Bulpitt: So if the output is incorrect.
+
+274
+00:39:29.070 --> 00:39:44.520
+Andrew Bulpitt: So if the neuron is is firings got a value of one, but it shouldn't have been, then what you do is take the values of the weights and you subtract the value of y off of them okay for each of the inputs.
+
+275
+00:39:46.200 --> 00:40:03.660
+Andrew Bulpitt: If the neuron is producing zero instead of a one, then what you do is take each the weights and add to those the value of why I so again for each of the, so this is known as the precept on learning rule you keep going around until the weights will finally stabilize.
+
+276
+00:40:16.110 --> 00:40:24.720
+Andrew Bulpitt: One of the problems with that sort of approach is that by adding or subtracting why you can actually sort of overstep a good solution okay so.
+
+277
+00:40:25.860 --> 00:40:30.030
+Andrew Bulpitt: This sort of basic algorithm has evolved over over the years.
+
+278
+00:40:32.220 --> 00:40:36.660
+Andrew Bulpitt: To try and slow the convergence of the weights prevent that overstepping.
+
+279
+00:40:39.330 --> 00:40:43.770
+Andrew Bulpitt: and often known as the half learning rural delta rule.
+
+280
+00:40:44.790 --> 00:40:51.330
+Andrew Bulpitt: But the idea here is that you calculate a delta, which is the the difference between the desired result D.
+
+281
+00:40:52.350 --> 00:40:54.450
+Andrew Bulpitt: And the current.
+
+282
+00:40:56.640 --> 00:41:06.420
+Andrew Bulpitt: result okay so that's gives you a measure of how far away, are they what how big is the difference between them right and use that.
+
+283
+00:41:06.960 --> 00:41:19.800
+Andrew Bulpitt: To control how much you change the weights, so if you're a long way off the desired result you want to increase the weights more and if you're close to the desired results, you want to increase the weights less.
+
+284
+00:41:21.870 --> 00:41:27.060
+Andrew Bulpitt: So we look at the difference between the desired results, and the current result to create Delta.
+
+285
+00:41:28.320 --> 00:41:34.950
+Andrew Bulpitt: And then, for each week we update them by the new way w is equal to the old way wi plus.
+
+286
+00:41:36.780 --> 00:41:41.100
+Andrew Bulpitt: epsilon times delta times the input why.
+
+287
+00:41:45.120 --> 00:41:49.380
+Andrew Bulpitt: and say delta controls the size of the.
+
+288
+00:41:51.630 --> 00:42:08.040
+Andrew Bulpitt: change that you can make to a weight based on its current era okay epsilon here is used to control the learning rate so when we first start training networks, this is often high and it decreases then over time.
+
+289
+00:42:12.870 --> 00:42:19.380
+Andrew Bulpitt: So the outcomes been shown to converge if a solution exists and it's known as the perceptual convergence theorem.
+
+290
+00:42:26.850 --> 00:42:36.630
+Andrew Bulpitt: So that gives you a bit of a background okay so we've created this basic model of a neuron it has these weights associated with the inputs right.
+
+291
+00:42:37.980 --> 00:42:44.640
+Andrew Bulpitt: And we can adapt those weights using a learning algorithm Okay, and this is an optimization algorithm.
+
+292
+00:42:46.590 --> 00:42:50.190
+Andrew Bulpitt: Just like the gradient descent algorithms that we were talking about before.
+
+293
+00:42:52.200 --> 00:42:57.420
+Andrew Bulpitt: So a single perception is behaving like a linear classifier here.
+
+294
+00:42:59.160 --> 00:43:01.950
+Andrew Bulpitt: it's inspecting the sign of the linear quantity.
+
+295
+00:43:03.600 --> 00:43:09.270
+Andrew Bulpitt: The weight vector times the input vector w dot y.
+
+296
+00:43:10.890 --> 00:43:16.530
+Andrew Bulpitt: So it's same as we were talking about with our government functions and all day classifies.
+
+297
+00:43:19.560 --> 00:43:27.840
+Andrew Bulpitt: If an SEC Johnson classifies patents, at the end classes, this depends on each class being linearly separable from the others.
+
+298
+00:43:29.040 --> 00:43:34.830
+Andrew Bulpitt: Show you an example of that in a moment, so this is suggesting that say I had two classes A and B.
+
+299
+00:43:36.150 --> 00:43:38.160
+Andrew Bulpitt: Can I find a.
+
+300
+00:43:39.810 --> 00:43:50.370
+Andrew Bulpitt: linear discriminate function that would partition those two classes right but very often that's not the case Okay, the the the discriminate functioned needs to be more complicated.
+
+301
+00:43:51.420 --> 00:43:53.610
+Andrew Bulpitt: So many problems don't fall into that category.
+
+302
+00:43:54.960 --> 00:43:55.470
+Andrew Bulpitt: So there's a.
+
+303
+00:43:57.090 --> 00:44:09.360
+Andrew Bulpitt: Immediate limitation on what you can do with a single set of perceptions and here's an example of a test that you're probably very familiar with so just a two bit power to test.
+
+304
+00:44:10.830 --> 00:44:14.280
+Andrew Bulpitt: All the X or function if you've got two inputs.
+
+305
+00:44:16.380 --> 00:44:19.380
+Andrew Bulpitt: Here, if they're both zero, then the output should be zero.
+
+306
+00:44:20.610 --> 00:44:25.770
+Andrew Bulpitt: If one input is here, and the other one is one the output should be one if the other input is one.
+
+307
+00:44:27.000 --> 00:44:34.710
+Andrew Bulpitt: This one is zero the output should be one if they're both one than the output should be zero so only produces a one when only one of the inputs is.
+
+308
+00:44:35.820 --> 00:44:36.540
+Andrew Bulpitt: set to one.
+
+309
+00:44:37.830 --> 00:44:44.610
+Andrew Bulpitt: plot that in our future space Okay, you can see here is if they're both zero I would.
+
+310
+00:44:45.990 --> 00:45:04.590
+Andrew Bulpitt: want to generate output zero, which is, which is my black circle okay if they're both one, then I want the output to be zero so another black circle appear and then for the other two inputs were one or other is one I want the output to be one shown by blue the blue circles here.
+
+311
+00:45:06.480 --> 00:45:11.580
+Andrew Bulpitt: And I can't draw a single straight line through here, which would partition those.
+
+312
+00:45:14.100 --> 00:45:24.180
+Andrew Bulpitt: Examples into the right classes right if I put this vertical line anywhere, then i'd end up with both blue and a black circle on both sides of the Line.
+
+313
+00:45:24.780 --> 00:45:32.700
+Andrew Bulpitt: Okay it's still true if I try and put some sort of diagonal line to hear I can't find a way of getting the blue circles on one side line and the black circles, on the other.
+
+314
+00:45:36.240 --> 00:45:38.610
+Andrew Bulpitt: So it requires two lines to solve this problem.
+
+315
+00:45:41.370 --> 00:45:44.370
+Andrew Bulpitt: So it's better to petition the zeros from the ones.
+
+316
+00:45:45.930 --> 00:45:48.660
+Andrew Bulpitt: I need to different discriminate functions.
+
+317
+00:45:50.880 --> 00:45:52.800
+Andrew Bulpitt: So I want to say that below.
+
+318
+00:45:54.210 --> 00:46:09.180
+Andrew Bulpitt: My disagreement functionality one and above l to its its class one otherwise it's class zero so the ones in the middle, but we can actually implement that as a composite etc.
+
+319
+00:46:10.830 --> 00:46:12.690
+Andrew Bulpitt: Where you've got multiple layers here.
+
+320
+00:46:14.280 --> 00:46:26.670
+Andrew Bulpitt: So i've got my inputs w sorry why want and why to okay and they're connected by weights to two different neurons or percent chance here.
+
+321
+00:46:27.720 --> 00:46:40.830
+Andrew Bulpitt: Which i've got different biases Peter equal to zero and teach equal to one Okay, but they in turn are connected to another neural right which is the output neuron.
+
+322
+00:46:42.810 --> 00:46:57.210
+Andrew Bulpitt: And then, this allows us to combine the values of the two different linear discriminate functions determined by the first layer of neurons OK, so the top.
+
+323
+00:46:58.050 --> 00:47:13.950
+Andrew Bulpitt: you're on here creates one linear function, the bottom one creates another the output you're on then combines these together right and allows us to create rules such as below one and above L two is one class.
+
+324
+00:47:15.870 --> 00:47:19.890
+Andrew Bulpitt: But if it's above l one and Level two then it's class zero.
+
+325
+00:47:21.870 --> 00:47:24.090
+Andrew Bulpitt: So we can do that by having multiple layers.
+
+326
+00:47:29.130 --> 00:47:31.170
+Andrew Bulpitt: Then the more features, you have.
+
+327
+00:47:33.060 --> 00:47:37.800
+Andrew Bulpitt: The more neurons you're going to require more the more inputs, you have.
+
+328
+00:47:38.940 --> 00:47:43.440
+Andrew Bulpitt: The more neurons you might need more linear functions, you might need.
+
+329
+00:47:44.880 --> 00:47:48.060
+Andrew Bulpitt: Depending on the complexity of your task right.
+
+330
+00:47:49.140 --> 00:48:01.260
+Andrew Bulpitt: But often you end up performing basically logistic regression at the at the end of this to determine how these different than government functions combined together.
+
+331
+00:48:07.740 --> 00:48:18.540
+Andrew Bulpitt: Okay, so a very basic overview of how this the optimization works in these sorts of neurons that your networks.
+
+332
+00:48:20.310 --> 00:48:21.690
+Andrew Bulpitt: So how are we going to do that.
+
+333
+00:48:22.740 --> 00:48:30.330
+Andrew Bulpitt: gradient descent type type task how we're going to implement that perceptual learning rule, so the idea here is that you, you.
+
+334
+00:48:30.840 --> 00:48:41.670
+Andrew Bulpitt: can present your patent at the input layer OK, so the first layer of neurons and you let those the hidden units, the one that's there in the middle evaluate their output using that pattern.
+
+335
+00:48:42.720 --> 00:48:47.760
+Andrew Bulpitt: And then you let the output units evaluate their output, using the result from step two.
+
+336
+00:48:49.110 --> 00:49:01.710
+Andrew Bulpitt: So you do first layer first calculate all the outputs of those neurons and then you do the next layer you can keep doing that, through your network right so that's known as the forward pass.
+
+337
+00:49:03.390 --> 00:49:08.820
+Andrew Bulpitt: that's just calculating what the how the network will respond to your current set of inputs.
+
+338
+00:49:11.070 --> 00:49:12.090
+Andrew Bulpitt: Now we want to know.
+
+339
+00:49:13.290 --> 00:49:13.620
+Andrew Bulpitt: Is.
+
+340
+00:49:14.730 --> 00:49:16.140
+Andrew Bulpitt: How close is that to our.
+
+341
+00:49:17.700 --> 00:49:27.060
+Andrew Bulpitt: Our target right what's the error currently so we applied, that the target pattern to the output layer, so this is saying this is what I expected the network.
+
+342
+00:49:28.350 --> 00:49:30.810
+Andrew Bulpitt: To produce right and we calculate.
+
+343
+00:49:33.060 --> 00:49:39.210
+Andrew Bulpitt: The error on those output nodes This is like our delta from the delta learning rule yeah.
+
+344
+00:49:40.320 --> 00:49:49.980
+Andrew Bulpitt: So for each output node you can calculate the delta that's how far away, is our current activation from the desired activation of that output note.
+
+345
+00:49:52.590 --> 00:49:53.160
+Andrew Bulpitt: You can then.
+
+346
+00:49:54.480 --> 00:50:00.540
+Andrew Bulpitt: train the output nodes right so using upset on the dining room dining room.
+
+347
+00:50:01.740 --> 00:50:16.950
+Andrew Bulpitt: Whatever you plan to use using some kind of gradient a central graded set with them so same idea trying to optimize the output of this node looking at the gradients was respect to the different weights or different inputs.
+
+348
+00:50:20.730 --> 00:50:21.780
+Andrew Bulpitt: Once you've got the.
+
+349
+00:50:23.700 --> 00:50:34.230
+Andrew Bulpitt: Trains the output node okay what you do is you, you take the era that you've currently got on the output node and you feed that back through the network to the hidden nodes behind.
+
+350
+00:50:36.750 --> 00:50:44.700
+Andrew Bulpitt: it's all about propagating those deltas those errors from the output nodes to all the hidden units behind.
+
+351
+00:50:48.240 --> 00:51:05.370
+Andrew Bulpitt: So then each hidden unit has got an error associated with it right and again, you can then apply some kind of gradient central guy in descent method to optimize the weight of each of those hidden unit or hidden notes.
+
+352
+00:51:08.790 --> 00:51:17.070
+Andrew Bulpitt: And you can do that for the different layers of your network so it's called the back propagation algorithm because back propagating.
+
+353
+00:51:17.460 --> 00:51:23.580
+Andrew Bulpitt: Errors through the network and there's lots of elaborate schemes for doing this, but the principles remain the same, you apply.
+
+354
+00:51:23.940 --> 00:51:31.830
+Andrew Bulpitt: Your data find out what the activation of the network currently is Compare that to the desired activation look at the errors.
+
+355
+00:51:32.670 --> 00:51:46.530
+Andrew Bulpitt: propagate those back through the network training each layer and network to minimize that era and that's why it's an optimization problem because you're trying to minimize this error and we can do that using our gradient descent or gradient sent out rooms.
+
+356
+00:51:53.070 --> 00:51:54.090
+Andrew Bulpitt: are multi layer
+
+357
+00:51:55.980 --> 00:51:57.240
+Andrew Bulpitt: Networks okay.
+
+358
+00:51:59.280 --> 00:52:01.140
+Andrew Bulpitt: can represent multi class.
+
+359
+00:52:02.370 --> 00:52:04.380
+Andrew Bulpitt: logistic regression problems.
+
+360
+00:52:06.360 --> 00:52:11.700
+Andrew Bulpitt: i've got some some features going into a set of neurons and the output of those.
+
+361
+00:52:13.440 --> 00:52:21.480
+Andrew Bulpitt: can be used to compute our soft Max function so remember these probability functions, based on the sigmoid right.
+
+362
+00:52:23.460 --> 00:52:24.960
+Andrew Bulpitt: So what will happen here is.
+
+363
+00:52:27.420 --> 00:52:38.520
+Andrew Bulpitt: The class of the example that you present to the network will be determined by which of these functions has the highest value so you sort of look at the probability that the example comes from.
+
+364
+00:52:40.710 --> 00:52:48.570
+Andrew Bulpitt: class one the probability it comes from class to visit comes from Class three Okay, and you choose the one with the highest probability.
+
+365
+00:52:57.330 --> 00:52:59.190
+Andrew Bulpitt: And how the deep networks.
+
+366
+00:53:00.960 --> 00:53:10.230
+Andrew Bulpitt: relate to this OK, this is just where you start to get more and more layers like can start to create more and more complicated functions.
+
+367
+00:53:12.990 --> 00:53:14.550
+Andrew Bulpitt: To petition your feature space.
+
+368
+00:53:16.440 --> 00:53:18.210
+Andrew Bulpitt: Whereas, when we were talking about.
+
+369
+00:53:19.890 --> 00:53:29.580
+Andrew Bulpitt: The character recognition, for example, and we try to think about what features might be useful to the height and width of the character, or the number of loops in the character.
+
+370
+00:53:30.060 --> 00:53:37.290
+Andrew Bulpitt: Something of that and so historically a lot of efforts gone into trying to find features which are useful for.
+
+371
+00:53:38.370 --> 00:53:38.910
+Andrew Bulpitt: Training.
+
+372
+00:53:40.350 --> 00:53:55.080
+Andrew Bulpitt: These sorts of networks, but now deep neural networks are able to learn these features for themselves, so that when you get them wrong pixel values of characters, for example, they're able to learn the features that.
+
+373
+00:53:56.190 --> 00:53:58.650
+Andrew Bulpitt: provide the best classification.
+
+374
+00:54:00.330 --> 00:54:08.580
+Andrew Bulpitt: So that can be really interesting to try and find out from your sort of raw data, what are the interesting features in that data that enable you to.
+
+375
+00:54:10.050 --> 00:54:10.680
+Andrew Bulpitt: Put.
+
+376
+00:54:12.060 --> 00:54:19.110
+Andrew Bulpitt: Your examples into different classes okay So what is it about the features of of handwritten digits, for example.
+
+377
+00:54:20.580 --> 00:54:22.650
+Andrew Bulpitt: which allows us to determine whether it's.
+
+378
+00:54:23.760 --> 00:54:38.970
+Andrew Bulpitt: The number zero or the number nine Okay, and this can be come really interesting when you start looking at images, so all of your exes here I just pixel values and you look at what sorts of features is a network extracting from those images.
+
+379
+00:54:40.050 --> 00:54:44.850
+Andrew Bulpitt: In order for it to be able to identify objects in the image, for example.
+
+380
+00:54:53.160 --> 00:54:53.700
+Andrew Bulpitt: Okay.
+
+381
+00:54:54.720 --> 00:54:55.140
+Andrew Bulpitt: So.
+
+382
+00:55:02.490 --> 00:55:06.030
+Andrew Bulpitt: what's been proven through this universal function.
+
+383
+00:55:09.240 --> 00:55:19.980
+Andrew Bulpitt: theorem is that a to land your network with a sufficient number of neurons can actually approximate any continuous function to any desired accuracy.
+
+384
+00:55:22.140 --> 00:55:44.190
+Andrew Bulpitt: So you don't actually need lots and lots of of lightness okay to perform more complicated classification tasks right it's all about the numbers of late, but so the number of neurons having those layers which determine the types of functions that you can can learn.
+
+385
+00:55:47.460 --> 00:55:53.550
+Andrew Bulpitt: So that's quite interesting property and what you'll find when you look at some of these deep learning networks is.
+
+386
+00:55:55.230 --> 00:55:56.850
+Andrew Bulpitt: it's just about the types of layers.
+
+387
+00:55:58.260 --> 00:56:04.230
+Andrew Bulpitt: That you combine together which affect the types of functions which which seems networks can burn.
+
+388
+00:56:09.360 --> 00:56:14.160
+Andrew Bulpitt: The problem is with these networks is the number of neurons which are involved.
+
+389
+00:56:15.630 --> 00:56:23.580
+Andrew Bulpitt: So this, as we already know you've got too many features, for example, you start to have the danger of over 15 your data right.
+
+390
+00:56:24.210 --> 00:56:33.870
+Andrew Bulpitt: So when we're using these algorithms you have to think very carefully about the network over 50 and think about stopping early when that when the air gets below a certain value.
+
+391
+00:56:44.280 --> 00:56:45.630
+Andrew Bulpitt: But just to summarize.
+
+392
+00:56:51.960 --> 00:56:52.260
+Andrew Bulpitt: we've.
+
+393
+00:56:53.520 --> 00:56:56.340
+Andrew Bulpitt: thought about how linear regression.
+
+394
+00:56:57.480 --> 00:57:02.970
+Andrew Bulpitt: Can optimize the probability of a label or a class given a particular input.
+
+395
+00:57:06.060 --> 00:57:08.490
+Andrew Bulpitt: thought about how.
+
+396
+00:57:09.780 --> 00:57:10.500
+Andrew Bulpitt: We can.
+
+397
+00:57:12.330 --> 00:57:13.050
+Andrew Bulpitt: Find.
+
+398
+00:57:15.600 --> 00:57:21.090
+Andrew Bulpitt: The regression function that discriminate function by treating it as an optimization problem.
+
+399
+00:57:23.010 --> 00:57:35.040
+Andrew Bulpitt: Okay we're looking at gradient descent computing the steepest uphill direction the gradient and you and you take a step in that direction to the gradient by changing the weights in that direction.
+
+400
+00:57:36.150 --> 00:57:38.160
+Andrew Bulpitt: And you keep repeating that.
+
+401
+00:57:40.830 --> 00:57:51.210
+Andrew Bulpitt: Until the accuracy on some data is not being used for learning okay so some held out data starts to drop Okay, so when when you.
+
+402
+00:57:53.310 --> 00:57:57.180
+Andrew Bulpitt: When you start training initially you see your error rate.
+
+403
+00:57:58.530 --> 00:58:03.330
+Andrew Bulpitt: go down what your accuracy increase Okay, but then eventually if you're starting to overfit.
+
+404
+00:58:04.440 --> 00:58:12.690
+Andrew Bulpitt: We know from what we've discussed with decision trees that the accuracy will start to drop, so you need to stop Okay, and this is called early stopping.
+
+405
+00:58:18.480 --> 00:58:27.690
+Andrew Bulpitt: We talked about how this perception simple euro model is similar to a.
+
+406
+00:58:29.610 --> 00:58:34.980
+Andrew Bulpitt: linear regression function creates discriminate and function cases operates in the same way.
+
+407
+00:58:36.060 --> 00:58:45.960
+Andrew Bulpitt: Where we have a summation of weights times inputs much which determines a decision boundary and the activation determines which side of that boundary around.
+
+408
+00:58:47.640 --> 00:58:58.590
+Andrew Bulpitt: Your neck was really scale this to scale this problem up Okay, so they can solve far more problems than we could previously with just a few neurons in a couple of layers.
+
+409
+00:58:59.550 --> 00:59:09.870
+Andrew Bulpitt: Very often, that last layer is still some kind of logistic regression though okay trying to determine which class a particular input example belongs to.
+
+410
+00:59:13.710 --> 00:59:30.780
+Andrew Bulpitt: The number of layers which you use okay we've got this theorem that tells us, we only need to, but the layers before that, so the reason why you have multiple layers in deep neural networks is that they're all about trying to learn the features and before you perform this logistic regression.
+
+411
+00:59:32.670 --> 00:59:47.430
+Andrew Bulpitt: So one of the big advances with deep neural networks is that the features are learned, rather than being hand designed so many of these layers are about combining together pixels calculating different combination kernels all sorts of things.
+
+412
+00:59:48.600 --> 00:59:56.100
+Andrew Bulpitt: And you'll talk some more about that next year and you'll see some of these things in intelligent systems and robotics as well, if you do that module.
+
+413
+00:59:59.730 --> 01:00:08.700
+Andrew Bulpitt: OK, so the important things from this lecture that you need to know are about how a perceptual.
+
+414
+01:00:09.810 --> 01:00:18.420
+Andrew Bulpitt: computes its output from it inputs Okay, and how it can be used to classify something into a class a or B.
+
+415
+01:00:20.160 --> 01:00:35.790
+Andrew Bulpitt: All right, don't worry too much about and the gradient the Center of a cent algorithms or the or the backpack propagation learning algorithms because i've only discuss those very briefly, but they give you some ideas about how you can.
+
+416
+01:00:38.010 --> 01:00:53.490
+Andrew Bulpitt: Train these sorts of networks, based on your data so that that's the reason for introducing them, but you should understand how perceptions create discriminate functions Okay, you should be able to compute what the output of a perception is based on some inputs.
+
+417
+01:00:56.070 --> 01:01:03.720
+Andrew Bulpitt: Right well, thank you very much, I should leave it there, and if you've got any questions don't hesitate to email me.
+
+418
+01:01:04.740 --> 01:01:06.300
+Andrew Bulpitt: Next week or.
+
+419
+01:01:08.100 --> 01:01:11.790
+Andrew Bulpitt: put something on teams or drop by my office very happy to to help.
+

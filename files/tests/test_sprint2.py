@@ -1,11 +1,13 @@
 import pytest
+import os
+os.environ["TESTING"] = "1"
 from app import app as flask_app, db, models, mail
+del os.environ["TESTING"]
 from datetime import datetime, timedelta
 from flask_mail import Mail
 import logging
 from test_sprint1 import verify, signup, login
 import io
-import os
 
 @pytest.fixture
 def app():

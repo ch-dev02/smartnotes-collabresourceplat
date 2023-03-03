@@ -60,3 +60,6 @@ class NotesForm(FlaskForm):
 
 class DelResourceForm(FlaskForm):
     resource_id = HiddenField('resource_id', validators=[DataRequired()])
+
+class GenerateKeywordsForm(FlaskForm):
+    resource_id = HiddenField('resource_id', validators=[DataRequired()])

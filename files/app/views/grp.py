@@ -765,15 +765,20 @@ def resource(id):
     delForms = {}
     if reviews:
         rating = str(sum(review.rating for review in reviews) / len(reviews)) + "/5"
+        for review in reviews:
+            form3 = DelReviewForm()
+            form3.review_id.data = review.id
+            delForms[review.id] = form3
     else:
         rating = "No Ratings"
-    already_reviewed = models.Review.query.filter_by(resource=id, creator=current_user.id).first()
     dbKeywords = models.Keywords.query.filter_by(resource=id).first()
     if not dbKeywords:
         keywords = None
     else:
         keywords = json.loads(dbKeywords.json)
-    return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, keywords=keywords)
+    genform = GenerateKeywordsForm()
+    genform.resource_id.data = id
+    return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, delForms=delForms, keywords=keywords, genform=genform)
 
 """
 Download specific resource
