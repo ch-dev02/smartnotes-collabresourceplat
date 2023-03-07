@@ -11,9 +11,43 @@ from werkzeug.utils import secure_filename
 import os
 import math
 from ..scripts import *
+from nltk.stem import PorterStemmer
 
 logger = logging.getLogger(__name__)
-           
+ps = PorterStemmer()
+
+"""
+Adds resource title+id to the tree for a given folder
+Gets the tree from the database
+Splits the title into individual words
+Stems each word
+For each stem, if the stem is not in the tree, add it with the resource id
+If the stem is in the tree, add the resource id to the list of resources
+Updates the tree in the database
+"""
+def add_res_title_tree(title, folder_id, resource_id):
+    with app.app_context():
+        SearchTreeDB = models.SearchTree.query.filter_by(folder=folder_id).first()
+    tree = BinarySearchTree()
+    if SearchTreeDB.json != "":
+        tree.decode_json(SearchTreeDB.json)
+    stems = []
+    words = title.split(" ")
+    for w in words:
+        stems.append(ps.stem(w.lower()))
+    for stem in stems:
+        node = tree.find(stem)
+        if node is None:
+            tree.insert(stem, [resource_id])
+        else:
+            resources = node.resources
+            if resource_id not in resources:
+                node.resources.append(resource_id)
+    SearchTreeDB.json = tree.encode_json()
+    with app.app_context():
+        db.session.add(SearchTreeDB)
+        db.session.commit()
+
 """
 Home Page
 User must be logged in
@@ -179,8 +213,17 @@ def create_folder():
             logger.warning('User ' + current_user.email + ' tried to create folder in group: ' + str(group_id) + ' without permission')
             return redirect(url_for('group', id=group_id))
 
+        exists = models.Folder.query.filter_by(title=title, group=group_id).first()
+        if exists:
+            flash('Folder already exists with that title.', 'danger')
+            logger.info('User ' + current_user.email + ' tried to create folder that already exists: ' + title + ' in group: ' + str(group_id))
+            return redirect(url_for('group', id=group_id))
         folder = models.Folder(title=title, group=group_id)
         db.session.add(folder)
+        db.session.commit()
+        folder = models.Folder.query.filter_by(title=title, group=group_id).first()
+        tree = models.SearchTree(folder=folder.id, json="")
+        db.session.add(tree)
         db.session.commit()
         logger.info('User ' + current_user.email + ' created folder ' + title + ' in group: ' + str(group_id))
         flash('Folder created successfully.', 'success')
@@ -289,6 +332,7 @@ def add_url():
         resource = models.Resource(data=url, title=title, folder=id, creator=current_user.id, type="url")
         db.session.add(resource)
         db.session.commit()
+        add_res_title_tree(title, folder.id, resource.id)
         flash('URL added', 'success')
         logger.info('User ' + current_user.email + ' added URL to folder: ' + str(id))
         return redirect(url_for('folder', id=id))
@@ -382,6 +426,7 @@ def upload_material():
             resource = models.Resource(data=filepath, title=title, folder=id, creator=current_user.id, type="material")
             db.session.add(resource)
             db.session.commit()
+            add_res_title_tree(title=title, resource_id=resource.id, folder_id=id)
             flash("File uploaded", "success")
             logger.info('User ' + current_user.email + ' uploaded lecture material ' + str(resource.id) + ' to folder ' + str(id))
             return redirect(url_for('folder', id=id))
@@ -478,6 +523,7 @@ def upload_transcript():
             resource = models.Resource(data=filepath, title=title, folder=id, creator=current_user.id, type="transcript")
             db.session.add(resource)
             db.session.commit()
+            add_res_title_tree(title=title, resource_id=resource.id, folder_id=id)
             flash("File uploaded", "success")
             logger.info('User ' + current_user.email + ' uploaded lecture transcript ' + str(resource.id) + ' to folder ' + str(id))
             return redirect(url_for('folder', id=id))
@@ -557,6 +603,7 @@ def add_notes():
         resource = models.Resource(data=notes, title=title, folder=id, creator=current_user.id, type="notes")
         db.session.add(resource)
         db.session.commit()
+        add_res_title_tree(title=title, resource_id=resource.id, folder_id=id)
         flash("Notes added", "success")
         logger.info('User ' + current_user.email + ' added notes ' + str(resource.id) + ' to folder ' + str(id))
         return redirect(url_for('folder', id=id))
@@ -646,6 +693,7 @@ def edit_notes():
         if queue:
             db.session.delete(queue)
         db.session.commit()
+        add_res_title_tree(title=title, resource_id=resource.id, folder_id=resource.folder)
         flash("Notes edited", "success")
         logger.info('User ' + current_user.email + ' edited notes: ' + str(id))
         return redirect(url_for('folder', id=resource.folder))
@@ -771,6 +819,12 @@ def resource(id):
             delForms[review.id] = form3
     else:
         rating = "No Ratings"
+    already_reviewed = models.Review.query.filter_by(resource=id, creator=current_user.id).first()
+    if already_reviewed:
+        form2 = None
+    else:
+        form2 = ReviewForm()
+        form2.resource_id.data = id
     dbKeywords = models.Keywords.query.filter_by(resource=id).first()
     if not dbKeywords:
         keywords = None
@@ -778,7 +832,91 @@ def resource(id):
         keywords = json.loads(dbKeywords.json)
     genform = GenerateKeywordsForm()
     genform.resource_id.data = id
-    return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, delForms=delForms, keywords=keywords, genform=genform)
+    return render_template('resource.html', resource=resource, group=group, folder=folder, form=form, reviews=reviews, rating=rating, form2=form2, delForms=delForms, keywords=keywords, genform=genform)
+
+"""
+Report A Resource
+User must be logged in
+Post Request Only
+If Form doesn't validate, redirect to index, flash and log error
+Else
+ - Check resource exists
+ - Check folder exists
+ - Check parent group exists
+ - Check users is creator or group owner
+    - They can delete the resource on request already so no need to report
+ - Check if resource was created by group owner
+    - If so do nothing, not allowed to report the owners resources
+ - Check if resource was already reported by user
+    - If so do nothing, already reported
+ - Check if creating report would exceed max reports
+    - If so delete resource and all associated reviews and keywords
+    - No need to check if resource is transcript or material as only admin can create those
+ - Otherwise Create report
+"""
+@app.route("/resource/report", methods=['POST'])
+@login_required
+def report_resource():
+    form = DelResourceForm()
+    if form.validate_on_submit():
+        resource = models.Resource.query.filter_by(id=form.resource_id.data).first()
+        if not resource:
+            logger.info('User ' + current_user.email + ' sent invalid request to report resource ' + str(form.resource_id.data))
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        folder = models.Folder.query.filter_by(id=resource.folder).first()
+        if not folder:
+            logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data) + " with missing folder")
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        group = models.Group.query.filter_by(id=folder.group).first()
+        if not group:
+            logger.info('User ' + current_user.email + ' sent invalid request to delete resource ' + str(form.resource_id.data) + " with missing group")
+            flash("Invalid request", "danger")
+            return redirect(url_for('index'))
+        if resource.creator == current_user.id or group.owner == current_user.id:
+            logger.warning('User ' + current_user.email + ' tried to report a resource they can delete')
+            flash("You cannot report a resource you can delete.", "danger")
+            return redirect('/resource/'+str(form.resource_id.data))
+        if resource.creator == group.owner:
+            logger.warning('User ' + current_user.email + ' tried to report group owner\'s resource')
+            flash("You cannot report the group owner\'s resource", "danger")
+            return redirect('/resource/'+str(form.resource_id.data))
+        reported = models.Report.query.filter_by(item=form.resource_id.data, type="resource", user=current_user.id).first()
+        if reported:
+            logger.warning('User ' + current_user.email + ' tried to report a resource they already reported')
+            flash("You have already reported this resource.", "danger")
+            return redirect('/resource/'+str(form.resource_id.data))
+        reports = models.Report.query.filter_by(item=form.resource_id.data, type="resource").all()
+        num_members = len(models.Member.query.filter_by(group=group.id).all())
+        req_rep = max(5, math.ceil(num_members * 0.05))
+        if req_rep > num_members:
+            req_rep = num_members - 1 # -1 as creator cannot report own resource
+        if len(reports)+1 >= req_rep:
+            db.session.delete(resource)
+            keywords = models.Keywords.query.filter_by(resource=form.resource_id.data).first()
+            if keywords:
+                db.session.delete(keywords)
+            queued = models.Queue.query.filter_by(resource=form.resource_id.data).first()
+            if queued:
+                db.session.delete(queued)
+            reviews = models.Review.query.filter_by(resource=form.resource_id.data).all()
+            for review in reviews:
+                db.session.delete(review)
+            for report in reports:
+                db.session.delete(report)
+            logger.info('Resource ' + str(form.resource_id.data) + ' deleted due to number of reports')
+        else:
+            report = models.Report(item=form.resource_id.data, type="resource", user=current_user.id)
+            db.session.add(report)
+            logger.info('User ' + current_user.email + ' reported resource ' + str(form.resource_id.data))
+        db.session.commit()
+        flash("Resource reported", "success")
+        return redirect(url_for('folder', id=folder.id))
+    else:
+        logger.info('User ' + current_user.email + ' sent invalid request to report resource ' + str(form.resource_id.data))
+        flash("Invalid request", "danger")
+        return redirect(url_for('index'))
 
 """
 Download specific resource
@@ -916,6 +1054,9 @@ def delete_folder():
             logger.warning('User ' + current_user.email + ' tried to delete folder without permission')
             flash("You do not have permission to delete this folder", "danger")
             return redirect(url_for('index'))
+        tree = models.SearchTree.query.filter_by(folder=folder.id).first()
+        if tree:
+            db.session.delete(tree)
         resources = models.Resource.query.filter_by(folder=form.folder_id.data).all()
         for resource in resources:
             reviews = models.Review.query.filter_by(resource=resource.id).all()
@@ -976,12 +1117,17 @@ def delete_group():
             db.session.delete(member)
         folders = models.Folder.query.filter_by(group=id).all()
         for folder in folders:
+            tree = models.SearchTree.query.filter_by(folder=folder.id).first()
+            if tree:
+                db.session.delete(tree)
             resources = models.Resource.query.filter_by(folder=folder.id).all()
             for resource in resources:
                 reviews = models.Review.query.filter_by(resource=resource.id).all()
                 for review in reviews:
                     db.session.delete(review)
                 keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+                if keywords:
+                    db.session.delete(keywords)
                 if resource.type == "material" or resource.type == "transcript":
                     os.remove(resource.data)
                 db.session.delete(resource)
@@ -1032,7 +1178,7 @@ def leave_group():
         db.session.delete(member)
         folders = models.Folder.query.filter_by(group=id).all()
         for folder in folders:
-            resources = models.Resource.query.filter_by(folder=folder.id).first()
+            resources = models.Resource.query.filter_by(folder=folder.id).all()
             for resource in resources:
                 if resource.creator == current_user.id:
                     reviews = models.Review.query.filter_by(resource=resource.id).all()

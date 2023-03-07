@@ -18,15 +18,21 @@ socket.setdefaulttimeout(10)
 
 logger = logging.getLogger(__name__)
 
-admin.add_view(ModelView(models.User, db.session))
-admin.add_view(ModelView(models.PassToken, db.session))
-admin.add_view(ModelView(models.Group, db.session))
-admin.add_view(ModelView(models.Member, db.session))
-admin.add_view(ModelView(models.Folder, db.session))
-admin.add_view(ModelView(models.Resource, db.session))
-admin.add_view(ModelView(models.Review, db.session))
-admin.add_view(ModelView(models.Keywords, db.session))
-admin.add_view(ModelView(models.Queue, db.session))
+class CustomModelView(ModelView):
+    column_display_pk = True
+    column_hide_backrefs = False
+
+admin.add_view(CustomModelView(models.User, db.session))
+admin.add_view(CustomModelView(models.PassToken, db.session))
+admin.add_view(CustomModelView(models.Group, db.session))
+admin.add_view(CustomModelView(models.Member, db.session))
+admin.add_view(CustomModelView(models.Folder, db.session))
+admin.add_view(CustomModelView(models.Resource, db.session))
+admin.add_view(CustomModelView(models.Review, db.session))
+admin.add_view(CustomModelView(models.Keywords, db.session))
+admin.add_view(CustomModelView(models.Queue, db.session))
+admin.add_view(CustomModelView(models.Report, db.session, ))
+admin.add_view(CustomModelView(models.SearchTree, db.session))
 
 # Decorator to check if user is logged in
 def logged_out_only(func):
@@ -81,7 +87,8 @@ def account():
             logger.warning('User: ' + current_user.email + ' tried to change password with invalid new password')
             return redirect('/account')
         # update password
-        current_user.password_hash = generate_password_hash(form.new_password.data)
+        user = models.User.query.filter_by(email=current_user.email).first()
+        user.password_hash = generate_password_hash(form.new_password.data)
         db.session.commit()
         logger.info('User: ' + current_user.email + ' changed password')
         flash("Password Changed", 'success')
@@ -111,7 +118,7 @@ def deleteAccount():
     form = DeleteAccountForm()
     if form.validate_on_submit():
         # check password is correct
-        if not check_password_hash(current_user.password, form.password.data):
+        if not check_password_hash(current_user.password_hash, form.password.data):
             flash("Invalid Password", 'danger')
             logger.warning('User: ' + current_user.email + ' tried to delete account with invalid password')
             return redirect('/account')
@@ -129,6 +136,9 @@ def deleteAccount():
             # delete folders, resource, reviews, keywords associated with the group
             folders = models.Folder.query.filter_by(group=group.id).all()
             for folder in folders:
+                tree = models.SearchTree.query.filter_by(folder=folder.id).first()
+                if tree:
+                    db.session.delete(tree)
                 resources = models.Resource.query.filter_by(folder=folder.id).all()
                 for resource in resources:
                     models.Review.query.filter_by(resource=resource.id).delete()
@@ -140,9 +150,9 @@ def deleteAccount():
         # remove membership from any groups they are a member of
         models.Member.query.filter_by(user=current_user.id).delete()
         # delete any reviews they have made
-        models.Review.query.filter_by(user=current_user.id).delete()
+        models.Review.query.filter_by(creator=current_user.id).delete()
         # delete any resources they have uploaded and their keywords
-        resources = models.Resource.query.filter_by(owner=current_user.id).all()
+        resources = models.Resource.query.filter_by(creator=current_user.id).all()
         for resource in resources:
             models.Keywords.query.filter_by(resource=resource.id).delete()
             if resource.type == "material" or resource.type == "transcript":

@@ -24,7 +24,7 @@ login_manager.login_view = 'login'
 login_manager.login_message = 'Please login to use this website.'
 login_manager.login_message_category = 'primary'
 
-mail = Mail(None)
+mail = Mail(app)
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)

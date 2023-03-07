@@ -60,8 +60,23 @@ class Queue(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     resource = db.Column(db.Integer, db.ForeignKey('resource.id'))
 
+class Report(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    item = db.Column(db.Integer)
+    type = db.Column(db.String(256))
+    user = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class SearchTree(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    folder = db.Column(db.Integer, db.ForeignKey('folder.id'))
+    json = db.Column(db.Text)
+
 # Available Resource Types:
 #   - 'material' (PDF, upload on site, data=filename)
 #   - 'transcript' (TXT, upload on site, data=filename)
 #   - 'notes' (MD, input on site, no upload, data=content)
 #   - 'url' (URL, input on site, no upload, data=url)
+
+# Available Report Types:
+#   - 'resource' (item=resource.id)
+#   - 'review' (item=review.id)

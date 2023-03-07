@@ -2,6 +2,7 @@ from app import app, db, models, celery
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
 from ..forms import *
+from ..scripts import Node, BinarySearchTree
 import logging
 import html
 import time
@@ -92,6 +93,214 @@ def generate():
         flash("Invalid form!", "danger")
         logger.warning("User %s submitted an invalid form!", current_user.email)
         return redirect(url_for("index"))
+
+"""
+FOR AJAX USE ONLY
+Folder Search Route
+GET Request Only
+Requires login
+Takes folder id and query as parameters
+If folder does not exist
+    - return message to user
+    - log error
+If user is not a member of the group
+    - return message to user
+    - log error
+If query is empty
+    - return message to user
+If query is not empty
+    - Get search tree
+    - If search tree does not exist
+        - return message to user
+        - log error
+    - If search tree exists
+        - Get results using stemmed words
+        - If results is empty
+            - return message to user
+        - If results is not empty
+            - return results as rendered page
+"""
+@app.route("/folder/search", methods=["GET"])
+@login_required
+def folder_search():
+    if not request.args.get("folder_id") or not request.args.get("query"):
+        logger.warning("User %s tried to search a folder without providing a folder id or query!", current_user.email)
+        return "No resources found", 200
+    folder_id = int(request.args.get("folder_id"))
+    query = request.args.get("query").strip().lower()
+    folder = models.Folder.query.filter_by(id=folder_id).first()
+    if not folder:
+        logger.warning("User %s tried to search a folder that does not exist!", current_user.email)
+        return "No resources found", 200
+    group = models.Group.query.filter_by(id=folder.group).first()
+    if not group:
+        logger.warning("User %s tried to search a folder in a group that does not exist!", current_user.email)
+        return "No resources found", 200
+    if current_user.id != group.owner and not models.Member.query.filter_by(user=current_user.id, group=group.id).first():
+        logger.warning("User %s tried to search a folder in a group they are not a member of!", current_user.email)
+        return "No resources found", 200
+    if not query:
+        logger.info("User %s searched a folder with an empty query!", current_user.email)
+        return "No resources found", 200
+    SearchTreeDB = models.SearchTree.query.filter_by(folder=folder_id).first()
+    if not SearchTreeDB:
+        logger.warning("User %s tried to search a folder that does not have a search tree!", current_user.email)
+        logger.error("Folder %s does not have a search tree!", folder_id)
+        return "No resources found", 200
+    tree = BinarySearchTree()
+    tree.decode_json(SearchTreeDB.json)
+    resources = []
+    words = query.split(" ")
+    for word in words:
+        stem = ps.stem(word)
+        node = tree.find(stem)
+        if node: # If the word is in the tree
+            resources = resources + node.resources
+    # Count duplicates in resources and put into a dictionary resource:count
+    resource_count = {}
+    for resource in resources:
+        if resource in resource_count:
+            resource_count[resource] += 1
+        else:
+            resource_count[resource] = 1
+    # Sort the dictionary by count, this will put most relevant resources at the start
+    sorted_resource_count = sorted(resource_count.items(), key=lambda x: x[1], reverse=True)
+    if len(sorted_resource_count) == 0:
+        logger.info("User %s searched a folder with a query that returned no results!", current_user.email)
+        return "No resources found", 200
+    # Convert to a list of resources
+    sorted_resources = []
+    for resource in sorted_resource_count:
+        sorted_resources.append(resource[0])
+    resources = models.Resource.query.filter(models.Resource.id.in_(sorted_resources)).all()
+    if not resources:
+        logger.info('User ' + current_user.email + ' tried to search for resources but none were found')
+        return 'No resources found', 200
+    dictratings = {}
+    dictkeywords = {}
+    count = 0
+    resources = []
+    for r in sorted_resource_count:
+        resource = models.Resource.query.filter_by(id=r[0]).first()
+        if resource:
+            resources.append(resource)
+            count += 1
+            ratings = models.Review.query.filter_by(resource=resource.id).all()
+            if ratings:
+                dictratings[int(resource.id)] = str(sum(rating.rating for rating in ratings) / len(ratings)) + "/5"
+            else:
+                dictratings[int(resource.id)] = "NA"
+            keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+            if keywords:
+                dictkeywords[int(resource.id)] = json.loads(keywords.json)
+            else:
+                dictkeywords[int(resource.id)] = []
+    if count == 0:
+        logger.info("User %s searched a group with a query that returned no results!", current_user.email)
+        return "No resources found", 200
+    return render_template('resources.html', resources=resources, ratings=dictratings, keywords=dictkeywords)
+
+"""
+FOR AJAX USE ONLY
+Group Search Route
+GET Request Only
+Requires login
+Takes group id and query as parameters
+If group does not exist
+    - return message to user
+    - log error
+If user is not a member of the group
+    - return message to user
+    - log error
+If query is empty
+    - return message to user
+If query is not empty
+    - For Each Folder
+        - Get search tree
+        - If search tree does not exist
+            - log error
+        - If search tree exists
+            - Get results using stemmed words
+            - If results is empty
+                - continue
+            - If results is not empty
+                - Add results to list of results
+    - If list of results is empty
+        - return message to user
+    - If list of results is not empty
+        - return results as rendered page
+"""
+@app.route("/group/search", methods=["GET"])
+@login_required
+def group_search():
+    if not request.args.get("group_id") or not request.args.get("query"):
+        logger.warning("User %s tried to search a group without providing a group id or query!", current_user.email)
+        return "No resources found", 200
+    group_id = int(request.args.get("group_id"))
+    query = request.args.get("query").strip().lower()
+    group = models.Group.query.filter_by(id=group_id).first()
+    if not group:
+        logger.warning("User %s tried to search a group that does not exist!", current_user.email)
+        return "No resources found", 200
+    if current_user.id != group.owner and not models.Member.query.filter_by(user=current_user.id, group=group.id).first():
+        logger.warning("User %s tried to search a group they are not a member of!", current_user.email)
+        return "No resources found", 200
+    if not query:
+        logger.info("User %s searched a group with an empty query!", current_user.email)
+        return "No resources found", 200
+    folders = models.Folder.query.filter_by(group=group_id).all()
+    if not folders:
+        logger.info("User %s searched a group with a query that returned no results!", current_user.email)
+        return "No resources found", 200
+    resources = []
+    words = query.split(" ")
+    for folder in folders:
+        SearchTreeDB = models.SearchTree.query.filter_by(folder=folder.id).first()
+        if not SearchTreeDB:
+            logger.warning("User %s tried to search a group that does not have a search tree!", current_user.email)
+            logger.error("Folder %s does not have a search tree!", folder.id)
+            continue
+        tree = BinarySearchTree()
+        tree.decode_json(SearchTreeDB.json)
+        for word in words:
+            stem = ps.stem(word)
+            node = tree.find(stem)
+            if node: # If the word is in the tree
+                resources = resources + node.resources
+    resource_count = {}
+    for resource in resources:
+        if resource in resource_count:
+            resource_count[resource] += 1
+        else:
+            resource_count[resource] = 1
+    sorted_resource_count = sorted(resource_count.items(), key=lambda x: x[1], reverse=True)
+    if len(sorted_resource_count) == 0:
+        logger.info("User %s searched a group with a query that returned no results!", current_user.email)
+        return "No resources found", 200
+    dictratings = {}
+    dictkeywords = {}
+    count = 0
+    resources = []
+    for r in sorted_resource_count:
+        resource = models.Resource.query.filter_by(id=r[0]).first()
+        if resource:
+            resources.append(resource)
+            count += 1
+            ratings = models.Review.query.filter_by(resource=resource.id).all()
+            if ratings:
+                dictratings[int(resource.id)] = str(sum(rating.rating for rating in ratings) / len(ratings)) + "/5"
+            else:
+                dictratings[int(resource.id)] = "NA"
+            keywords = models.Keywords.query.filter_by(resource=resource.id).first()
+            if keywords:
+                dictkeywords[int(resource.id)] = json.loads(keywords.json)
+            else:
+                dictkeywords[int(resource.id)] = []
+    if count == 0:
+        logger.info("User %s searched a group with a query that returned no results!", current_user.email)
+        return "No resources found", 200
+    logger.info('User ' + current_user.email + ' found resources for query: ' + query)
+    return render_template('resources.html', resources=resources, ratings=dictratings, keywords=dictkeywords)
 
 @celery.task
 def generator_pipeline():
@@ -265,7 +474,30 @@ def generator_pipeline():
             except:
                 keywords = extra_keywords
                 logger.warning("Could not extract keywords for resource %d", id)
-            if len(keywords) == 0:
+            if len(keywords) != 0:        
+                tree = BinarySearchTree()
+                with app.app_context():
+                    SearchTreeDB = models.SearchTree.query.filter_by(folder=resource.folder).first()
+                if SearchTreeDB.json != "":
+                    tree.decode_json(SearchTreeDB.json)
+                stems = []
+                for keyword in keywords:
+                    words = keyword.split(" ")
+                    for w in words:
+                        stems.append(ps.stem(w.lower()))
+                for stem in stems:
+                    node = tree.find(stem)
+                    if node is None:
+                        tree.insert(stem, [resource.id])
+                    else:
+                        resources = node.resources
+                        if resource.id not in resources:
+                            node.resources.append(resource.id)
+                SearchTreeDB.json = tree.encode_json()
+                with app.app_context():
+                    db.session.add(SearchTreeDB)
+                    db.session.commit()
+            else:
                 keywords = ["Extraction failed for this resource."]
 
         with app.app_context():
