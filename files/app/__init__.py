@@ -31,5 +31,5 @@ migrate = Migrate(app, db)
 
 admin = Admin(app, name='Admin', template_mode='bootstrap3')
 
-from app.views import auth, grp, kyw
+from app.views import auth, grp, rvw, kyw
 from app import models
