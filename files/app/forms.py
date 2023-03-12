@@ -60,3 +60,14 @@ class NotesForm(FlaskForm):
 
 class DelResourceForm(FlaskForm):
     resource_id = HiddenField('resource_id', validators=[DataRequired()])
+
+class ReviewForm(FlaskForm):
+    resource_id = HiddenField('resource_id', validators=[DataRequired()])
+    review = TextAreaField('review', validators=[DataRequired()])
+    rating = IntegerField('rating', validators=[DataRequired(), NumberRange(min=0, max=5)])
+
+class DelReviewForm(FlaskForm):
+    review_id = HiddenField('review_id', validators=[DataRequired()])
+
+class GenerateKeywordsForm(FlaskForm):
+    resource_id = HiddenField('resource_id', validators=[DataRequired()])

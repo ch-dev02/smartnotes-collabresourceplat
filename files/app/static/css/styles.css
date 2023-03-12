@@ -205,18 +205,6 @@ nav {
     background-color: #ccc;
 }
 
-@media screen and (max-width: 450px) {
-    .groups_grid {
-        width: 100%;
-        display: block;
-    }
-
-    .folders_grid {
-        width: 100%;
-        display: block;
-    }
-}
-
 /***** TABS SYSTEM *****/
 .tab {
     overflow: hidden;
@@ -248,8 +236,28 @@ nav {
     margin-top: 10px;
 }
 
-.tablinks:nth-of-type(1) {
-    border-right: 1px solid #ccc;
+.tablinks{
+    transition: border 0s ease !important;
+    border-right: 1px solid #ccc !important;
+}
+
+.tablinks:nth-last-of-type(1) {
+    border-right: none !important;
+}
+
+@media screen and (max-width: 768px) {
+    .tab {
+        grid-template-columns: 1fr;
+    }
+
+    .tablinks{
+        border-bottom: 1px solid #ccc !important;
+        border-right: none !important;
+    }
+
+    .tablinks:nth-last-of-type(1) {
+        border-bottom: none !important;
+    }
 }
 
 /***** FOLDER ADD DROPDOWN *****/
@@ -380,17 +388,6 @@ nav {
     }
 }
 
-.res-keywords {
-    order: 4;
-    border-top: 1px solid #cdcdcd;
-    background-color: #f9f9f9;
-}
-
-.res-no-key{
-    font-weight: normal;
-    margin-bottom: 0;
-}
-
 /***** RESOURCE LOADER *****/
 .loader {
     margin: 20px auto;
@@ -441,9 +438,166 @@ input[value="Save Notes"] {
     max-width: 200px;
 }
 
+/***** REVIEW FORM *****/
+#review-form {
+    margin-bottom: 20px;
+    padding: 10px 3px;
+}
+
+#review-form > .input-group > input[type="number"] {
+    max-width: 80px;
+}
+
+@media screen and (max-width: 500px) {
+    #review-form > .input-group {
+        display: block;
+    }
+
+    #review-form > .input-group > * {
+        width: 100%;
+        box-sizing: border-box;
+        margin: auto;
+        border-radius: 0;
+        min-height: 50px;
+    }
+    
+    #review-form > .input-group > textarea {
+        border-radius: 0.25rem 0.25rem 0 0;
+    }
+
+    #review-form > .input-group > input[type="submit"] {
+        border-radius: 0 0 0.25rem 0.25rem;
+    }
+
+    #review-form > .input-group > input[type="number"] {
+        max-width: 100%;
+    }
+}
+
+/***** REVIEW LIST *****/
+.rev-wrapper {
+    display: flex;
+    flex-flow: row wrap;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 10px;
+    background-color: white;
+    border-top: 1px solid #cdcdcd;
+    border-bottom: 1px solid #cdcdcd;
+    cursor: pointer;
+}
+
+.rev-wrapper:nth-of-type(1) {
+    margin-top: 0;
+}
+
+.rev-wrapper>* {
+    padding: 10px;
+    flex: 1 100%;
+}
+
+.rev-main {
+    padding-left: 2rem;
+    text-align: left;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+.rev-aside-r {
+    font-size: large;
+    font-weight: lighter;
+    font-style: italic;
+}
+
+.rev-aside-l {
+    font-size: x-large;
+}
+
+.rev-aside-l:hover {
+    color: red;
+}
+
+.rev-aside {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    min-height: 70px;
+}
+
+.res-keywords {
+    order: 4;
+    border-top: 1px solid #cdcdcd;
+    background-color: #f9f9f9;
+}
+
+.res-no-key{
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+@media all and (min-width: 600px) {
+    .rev-aside {
+        flex: 1 0 0;
+    }
+    .rev-aside-l {
+        border-right: 0px;
+    }
+}
+
+@media all and (max-width: 600px) {
+    .rev-aside-l {
+        border-top: 1px solid #cdcdcd;
+    }
+}
+
+@media all and (min-width: 800px) {
+    .rev-main {
+        flex: 7 0px;
+        order: 2;
+    }
+
+    .res-aside-l {
+        order: 1;
+    }
+
+    .rev-aside-r {
+        order: 3;
+    }
+}
+
+@media all and (max-width: 800px) {
+    .rev-main {
+        min-height: 40px;
+        text-align: center;
+        border-bottom: 1px solid #cdcdcd;
+    }
+
+    .rev-aside {
+        min-height: 40px;
+    }
+}
+
+@media all and (max-width: 800px) and (min-width: 600px) {
+    .rev-aside-l {
+        border-left: 1px solid #cdcdcd;
+    }
+}
+
 /**** CLASS TO SET WORD WRAP ****/
 .word-break-all {
     word-break: break-all;
+}
+
+/***** BUTTON WITH NO SYLES *****/
+.no-styles-button {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
 }
 
 /***** KEYWORD LIST *****/

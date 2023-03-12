@@ -1,0 +1,33 @@
+version: "3"
+name: "smartnotes"
+
+services:
+  web_server:
+    container_name: web_server
+    build: .
+    ports:
+      - "5000:5000"
+    links:
+      - redis_mp
+    depends_on:
+      - redis_mp
+    volumes:
+      - .:/app
+
+  redis_mp:
+    container_name: redis_mp
+    image: redis:5.0.5
+    hostname: redis
+
+  worker:
+    build:
+      context: .
+    hostname: worker
+    entrypoint: celery
+    command: -A app.celery worker --loglevel=info
+    volumes:
+      - .:/app
+    links:
+      - redis_mp
+    depends_on:
+      - redis_mp

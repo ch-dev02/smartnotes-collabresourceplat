@@ -12,11 +12,24 @@
     <input onclick="window.location.href='/resource/download/{{resource.id}}'" type="submit" class="btn btn-success col"
         value="Download">
     {% endif %}
+    {% if keywords == None %}
+    <form action="/generate" method="post" name="generate" class="d-inline-block" enctype="multipart/form-data">
+        {{ genform.csrf_token }}
+        {{ genform.resource_id }}
+        <input type="submit" class="btn btn-primary col" value="Generate Keywords">
+    </form>
+    {% endif %}
     {% if group.owner == current_user.id or resource.creator == current_user.id %}
     <form action="/resource/delete" method="post" name="delete" class="d-inline-block" enctype="multipart/form-data">
         {{ form.csrf_token }}
         {{ form.resource_id }}
         <input type="submit" class="btn btn-danger col" value="Delete">
+    </form>
+    {% elif resource.creator != group.owner %}
+    <form action="/resource/report" method="post" name="res_report" class="d-inline-block" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+        {{ form.resource_id }}
+        <input type="submit" class="btn btn-danger col" value="Report">
     </form>
     {% endif %}
     <br>
@@ -54,6 +67,41 @@
     {% endif %}
     <hr>
     <h4>Reviews</h4>
-    <p>To Be Implemented Later</p>
+    {% if form2 %}
+    <form action="/review" method="post" name="review" enctype="multipart/form-data" id="review-form">
+        {{ form2.csrf_token }}
+        {{ form2.resource_id }}
+        <div class="input-group">
+            {{ form2.review(class_='form-control', placeholder='Your Comment', maxlength='250') }}
+            {{ form2.rating(class_='form-control', placeholder='1-5') }}
+            <input type="submit" class="btn btn-primary" value="Submit">
+        </div>
+    </form>
+    {% endif %}
+    {% if reviews %}
+    {% for review in reviews %}
+    <div class="rev-wrapper">
+        <div class="rev-main word-break-all">
+            {{ review.comment }}
+        </div>
+        <div class="rev-aside rev-aside-r word-break-all">{{review.rating}}/5</div>
+        {% if current_user.id == group.owner or current_user.id == review.creator %}
+        <form action="/review/delete" method="post" name="review_delete" enctype="multipart/form-data" id="review-delete" class="rev-aside rev-aside-l">
+            {{ delForms[review.id].csrf_token }}
+            {{ delForms[review.id].review_id }}
+            <button title="Delete" class="no-styles-button text-danger"><i class="bi bi-trash-fill"></i></button>
+        </form>
+        {% else %}
+        <form action="/review/report" method="post" name="review_report" enctype="multipart/form-data" id="review-delete" class="rev-aside rev-aside-l">
+            {{ delForms[review.id].csrf_token }}
+            {{ delForms[review.id].review_id }}
+            <button title="Report" class="no-styles-button text-danger"><i class="bi bi-flag-fill"></i></button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="text-center">No reviews yet</p>
+    {% endif %}
 </div>
 {% endblock %}

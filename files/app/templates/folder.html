@@ -28,6 +28,7 @@
   <div class="tab">
     <button class="tablinks" onclick="openTab(event, 'Admin');loadResources('Admin')">Admin Uploads</button>
     <button class="tablinks" onclick="openTab(event, 'User');loadResources('User')">User Uploads</button>
+    <button class="tablinks" onclick="openTab(event, 'Search');">Search</button>
   </div>
 
   <div id="Admin" class="tabcontent">
@@ -45,10 +46,57 @@
       <div></div>
     </div>
   </div>
+
+  <div id="Search" class="tabcontent">
+    <p>* Limited to 20 results per search. Results consist of similar or matching keywords and resource titles.</p>
+    <form action="javascript:handleSearch()">
+      <div class="input-group mb-3">
+          <input class="form-control" id="query" name="query" placeholder="Search Query" required="" type="text">
+          <div class="input-group-append">
+              <input type="submit" class="btn btn-primary" value="Search">
+          </div>
+      </div>
+    </form>
+    <div id="search_results"></div>
+    <div class="loader" id="searchLoader" style="display: none;">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
 </div>
 <script>
   var adminFetched = false;
   var userFetched = false;
+
+  function handleSearch(){
+    var query = document.getElementById("query").value;
+    var tab = document.getElementById("search_results");
+    var loader = document.getElementById("searchLoader");
+    loader.style.display = "block";
+    
+    if (query == "") {
+      return;
+    }
+
+    $.ajax({
+      url: "/folder/search",
+      type: "get", //send it through get method
+      data: {
+        folder_id: {{folder.id}},
+        query: query
+      },
+      success: function (response) {
+        loader.style.display = "none";
+        tab.innerHTML = response;
+      },
+      error: function (xhr) {
+        loader.style.display = "none";
+        tab.innerHTML = "<p style='text-align:center;color:red;'>Failed to get any resources. Server did not respond.</p>";
+      }
+    });
+
+  }
 
   function loadResources(type) {
     var tab = document.getElementById(type);

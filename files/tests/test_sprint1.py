@@ -1,10 +1,14 @@
 import pytest
+import os
+os.environ["TESTING"] = "1"
 from app import app as flask_app, db, models, mail
+del os.environ["TESTING"]
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_mail import Mail
 import logging
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def app():
     flask_app.config['TESTING'] = True
     flask_app.config['WTF_CSRF_ENABLED'] = False

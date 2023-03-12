@@ -1,11 +1,13 @@
 import pytest
+import os
+os.environ["TESTING"] = "1"
 from app import app as flask_app, db, models, mail
+del os.environ["TESTING"]
 from datetime import datetime, timedelta
 from flask_mail import Mail
 import logging
 from test_sprint1 import verify, signup, login
 import io
-import os
 
 @pytest.fixture
 def app():
@@ -265,6 +267,8 @@ def test_create_folder(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.commit()
 
@@ -330,7 +334,7 @@ Test Add Url Variations:
 7. In Group and Valid
 8. In Group, Url already exists
 """
-def test_add_url(app, client):
+def test_add_res(app, client):
 
     def add_url(client, folder_id, url, title):
         return client.post('/add_url', data=dict(url=url, title=title), query_string=dict(folder=folder_id), follow_redirects=True)
@@ -388,6 +392,8 @@ def test_add_url(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.delete(url)
         db.session.commit()
@@ -399,7 +405,7 @@ Test Delete Url Variations:
 3. Not Resource's Group Owner or Resource Creator
 4. Valid User, Valid Resource
 """
-def test_delete_url(app, client):
+def test_delete_res(app, client):
     signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
     signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
     with app.app_context():
@@ -445,6 +451,8 @@ def test_delete_url(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.commit()
 
@@ -517,6 +525,8 @@ def test_add_note(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.delete(note)
         db.session.commit()
@@ -575,6 +585,8 @@ def test_delete_note(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.commit()
 
@@ -663,6 +675,8 @@ def test_edit_note(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.delete(note)
         db.session.delete(collision)
@@ -747,6 +761,8 @@ def test_add_transcript(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.delete(transcript)
         db.session.commit()
@@ -829,6 +845,8 @@ def test_add_material(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.delete(material)
         db.session.commit()
@@ -897,6 +915,8 @@ def test_delete_transcript(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.commit()
 
@@ -964,5 +984,7 @@ def test_delete_material(app, client):
         db.session.delete(user)
         db.session.delete(user2)
         db.session.delete(group)
+        st = models.SearchTree.query.filter_by(folder=folder.id).first()
+        db.session.delete(st) 
         db.session.delete(folder)
         db.session.commit()

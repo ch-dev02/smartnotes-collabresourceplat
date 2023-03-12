@@ -5,11 +5,18 @@ from flask_login import LoginManager
 from flask_admin import Admin
 from flask_mail import Mail
 import logging
+from celery import Celery
 
 logging.basicConfig(filename='log.log', level=logging.INFO, format='%(asctime)s %(levelname)s : %(message)s')
 
 app = Flask(__name__)
 app.config.from_object('config')
+
+celery = Celery(
+    __name__,
+    broker="redis://redis:6379/0",
+    backend="redis://redis:6379/0"
+)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -24,5 +31,5 @@ migrate = Migrate(app, db)
 
 admin = Admin(app, name='Admin', template_mode='bootstrap3')
 
-from app.views import auth, grp
+from app.views import auth, grp, rvw, kyw
 from app import models
