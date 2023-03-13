@@ -14,6 +14,7 @@ Requirements:
 3. do 'docker-compose up' to run 
 4. This will create and run a collection of docker containers called smartnotes
 5. You can view the website by going to http://localhost:5000
+6. Enable emails by following the instructions in files/config.py
 
 ### To Run Unit Tests Option 1:
 1. Run the docker container 'smartnotes' created in the 'To Run' section.

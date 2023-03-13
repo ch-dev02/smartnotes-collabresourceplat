@@ -16,6 +16,9 @@ def valid_password(password):
     if not any(char.islower() for char in password):
         return False
 
+    if not any(char in "!@#$%^&*()_+-=[];:,./?" for char in password):
+        return False
+
     return True
     
 def allowed_file(filename, extensions):
