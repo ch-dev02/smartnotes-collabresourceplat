@@ -890,7 +890,7 @@ def report_resource():
         reports = models.Report.query.filter_by(item=form.resource_id.data, type="resource").all()
         num_members = len(models.Member.query.filter_by(group=group.id).all())
         req_rep = max(5, math.ceil(num_members * 0.05))
-        if req_rep > num_members:
+        if req_rep >= num_members:
             req_rep = num_members - 1 # -1 as creator cannot report own resource
         if len(reports)+1 >= req_rep:
             db.session.delete(resource)
