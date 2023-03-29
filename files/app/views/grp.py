@@ -28,22 +28,21 @@ Updates the tree in the database
 def add_res_title_tree(title, folder_id, resource_id):
     with app.app_context():
         SearchTreeDB = models.SearchTree.query.filter_by(folder=folder_id).first()
-    tree = BinarySearchTree()
+    tree = {}
     if SearchTreeDB.json != "":
-        tree.decode_json(SearchTreeDB.json)
+        json.loads(SearchTreeDB.json)
     stems = []
     words = title.split(" ")
     for w in words:
         stems.append(ps.stem(w.lower()))
     for stem in stems:
-        node = tree.find(stem)
-        if node is None:
-            tree.insert(stem, [resource_id])
+        if stem not in tree:
+            tree[stem] =  [resource_id]
         else:
-            resources = node.resources
+            resources = tree[stem]
             if resource_id not in resources:
-                node.resources.append(resource_id)
-    SearchTreeDB.json = tree.encode_json()
+                tree[stem].append(resource_id)
+    SearchTreeDB.json = json.dumps(tree)
     with app.app_context():
         db.session.add(SearchTreeDB)
         db.session.commit()

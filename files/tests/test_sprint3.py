@@ -51,13 +51,13 @@ def test_group_search(app, client):
     def search_group(client, query, group_id):
         return client.get('/group/search', query_string=dict(query=query, group_id=group_id), follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group").first()
@@ -122,13 +122,13 @@ def test_folder_search(app, client):
     def search_folder(client, query, folder_id):
         return client.get('/folder/search', query_string=dict(query=query, folder_id=folder_id), follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group").first()
@@ -177,13 +177,13 @@ Test Keyword Extractor:
 4. Invalid, Already Generated
 """
 def test_extractor_interface(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group").first()
@@ -246,8 +246,8 @@ Test Review Resource:
 """
 def test_review_resource(app, client):
     # Create 2 Users, Admin and Member
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user1 = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
@@ -255,7 +255,7 @@ def test_review_resource(app, client):
     verify(client, user2.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user1.id).first()
@@ -265,7 +265,7 @@ def test_review_resource(app, client):
 
     # Member Joins Group
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     join_group(client, group.code)
     with app.app_context():
         member = models.Member.query.filter_by(user=user2.id, group=group.id).first()
@@ -277,7 +277,7 @@ def test_review_resource(app, client):
     
     # Test Create Review
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res1 = review_resource(client, "", 5, "Test Review")
     assert b"Invalid form!" in res1.data
 
@@ -305,7 +305,7 @@ def test_review_resource(app, client):
     assert b"You have already reviewed this resource!" in res7.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res8 = review_resource(client, resource.id, 5, "Test Review")
     assert b"You cannot review your own resource!" in res8.data
 
@@ -335,9 +335,9 @@ def test_delete_review(app, client):
         return client.post('/review/delete', data=dict(review_id=review_id), follow_redirects=True)
 
     # Create 3 Users, Admin and 2xMember
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
-    signup(client, "smartnotes_uol+test@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "smartnotes_uol+test@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user1 = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
@@ -347,7 +347,7 @@ def test_delete_review(app, client):
     verify(client, user3.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user1.id).first()
@@ -357,10 +357,10 @@ def test_delete_review(app, client):
 
     # Member Joins Group
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     join_group(client, group.code)
     client.get('/logout')
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     join_group(client, group.code)
     with app.app_context():
         member1 = models.Member.query.filter_by(user=user2.id, group=group.id).first()
@@ -373,14 +373,14 @@ def test_delete_review(app, client):
     
     # Create Review
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     review_resource(client, resource.id, 5, "Test Review")
     with app.app_context():
         review = models.Review.query.filter_by(resource=resource.id, creator=user2.id).first()
 
     # Test Delete Review
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res1 = delete_review(client, "")
     assert b"Invalid form!" in res1.data
 
@@ -388,12 +388,12 @@ def test_delete_review(app, client):
     assert b"Review not found!" in res2.data
 
     client.get("/logout")
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     res3 = delete_review(client, review.id)
     assert b"You cannot delete this review!" in res3.data
 
     client.get("/logout")
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_review(client, review.id)
     assert b"Review deleted!" in res4.data
     with app.app_context():
@@ -432,10 +432,10 @@ def test_report_resource(app, client):
                             follow_redirects=True)
     
     # Create 4 user (1 admin, 3 members)
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
-    signup(client, "smartnotes_uol+test@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002+test@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "smartnotes_uol+test@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002+test@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
@@ -447,7 +447,7 @@ def test_report_resource(app, client):
     verify(client, user4.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -457,13 +457,13 @@ def test_report_resource(app, client):
     
     # All Other Users Join Group
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     join_group(client, group.code)
     client.get('/logout')
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     join_group(client, group.code)
     client.get('/logout')
-    login(client, "charrison16082002+test@gmail.com", "Password1")
+    login(client, "charrison16082002+test@gmail.com", "Password1!")
     join_group(client, group.code)
 
     with app.app_context():
@@ -477,7 +477,7 @@ def test_report_resource(app, client):
         resource = models.Resource.query.filter_by(title="Google", folder=folder.id).first()
     
     client.get("/logout")
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
 
     res1 = report_resource(client, "")
     assert b"Invalid request" in res1.data
@@ -486,17 +486,17 @@ def test_report_resource(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res3 = report_resource(client, resource.id)
     assert b"You cannot report a resource you can delete." in res3.data
 
     client.get('/logout')
-    login(client, "charrison16082002+test@gmail.com", "Password1")
+    login(client, "charrison16082002+test@gmail.com", "Password1!")
     res4 = report_resource(client, resource.id)
     assert b"You cannot report a resource you can delete." in res4.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res5 = report_resource(client, resource.id)
     assert b"Resource reported" in res5.data
     with app.app_context():
@@ -510,7 +510,7 @@ def test_report_resource(app, client):
     assert len(reports) == 1
 
     client.get('/logout')
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     res7 = report_resource(client, resource.id)
     assert b"Resource reported" in res7.data
     with app.app_context():
@@ -553,10 +553,10 @@ def test_report_review(client, app):
     # Create 4 user (1 admin, 3 members)
     # User 1 creates the resource
     # User 2 creates the review
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
-    signup(client, "smartnotes_uol+test@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002+test@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "smartnotes_uol+test@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002+test@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
@@ -568,7 +568,7 @@ def test_report_review(client, app):
     verify(client, user4.id)
 
     # Create A Group with a folder
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -578,13 +578,13 @@ def test_report_review(client, app):
     
     # All Other Users Join Group
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     join_group(client, group.code)
     client.get('/logout')
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     join_group(client, group.code)
     client.get('/logout')
-    login(client, "charrison16082002+test@gmail.com", "Password1")
+    login(client, "charrison16082002+test@gmail.com", "Password1!")
     join_group(client, group.code)
 
     with app.app_context():
@@ -594,14 +594,14 @@ def test_report_review(client, app):
 
     # Create A Resource (As Admin)
     client.get("/logout")
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     client.post('/add_url', data=dict(url="https://www.google.com", title="Google"), query_string=dict(folder=folder.id), follow_redirects=True)
     with app.app_context():
         resource = models.Resource.query.filter_by(title="Google", folder=folder.id).first()
     
     # Create A Review (As User 2)
     client.get("/logout")
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     client.post('/review', data=dict(resource_id=resource.id, rating=5, review="This is a test review"), follow_redirects=True)
     with app.app_context():
         review = models.Review.query.filter_by(resource=resource.id, creator=user2.id).first()
@@ -616,12 +616,12 @@ def test_report_review(client, app):
     assert b"You cannot report reviews you have the ability to delete" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = report_review(client, review.id)
     assert b"You cannot report reviews you have the ability to delete" in res4.data
 
     client.get('/logout')
-    login(client, "charrison16082002+test@gmail.com", "Password1")
+    login(client, "charrison16082002+test@gmail.com", "Password1!")
     res5 = report_review(client, review.id)
     assert b"Review reported" in res5.data
     with app.app_context():
@@ -635,7 +635,7 @@ def test_report_review(client, app):
     assert len(reports) == 1
 
     client.get('/logout')
-    login(client, "smartnotes_uol+test@protonmail.com", "Password1")
+    login(client, "smartnotes_uol+test@protonmail.com", "Password1!")
     res7 = report_review(client, review.id)
     assert b"Review reported" in res7.data
     with app.app_context():

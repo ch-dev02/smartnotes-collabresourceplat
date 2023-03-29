@@ -52,11 +52,11 @@ Test Create Group Variantions:
 """
 def test_create_group(app, client):
     # Empty Title
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res1 = create_group(client, "")
     assert b"Error creating group" in res1.data
 
@@ -78,21 +78,21 @@ Test Join Group Variantions:
 3. Valid Code
 """
 def test_join_group(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
     
     client.get('/logout')
-    signup(client, "charrison16082002@gmail.com", "Password2", "Password2", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password2!", "Password2!", True, True)
     with app.app_context():
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user2.id)
-    login(client, "charrison16082002@gmail.com", "Password2")
+    login(client, "charrison16082002@gmail.com", "Password2!")
 
     res1 = join_group(client, "")
     assert b"Error joining group" in res1.data
@@ -122,11 +122,11 @@ Test Delete Group Variantions:
 4. Valid Group ID - Owner
 """
 def test_delete_group(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -143,16 +143,16 @@ def test_delete_group(app, client):
         db.session.commit()
 
     client.get('/logout')
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user2.id)
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_group(client, group.id)
     assert b"You cannot delete a group you do not own." in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_group(client, group.id)
     assert b"You have deleted the group" in res4.data
 
@@ -171,21 +171,21 @@ Test Leave Group Variantions:
 5. Valid Group ID - Owner
 """
 def test_leave_group(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
     client.get('/logout')
 
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user2.id)
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
 
     res1 = leave_group(client, "")
     assert b"Invalid request" in res1.data
@@ -207,7 +207,7 @@ def test_leave_group(app, client):
     assert membership is None
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res5 = leave_group(client, group.id)
     assert b"You cannot leave a group you own, you may delete it instead." in res5.data
 
@@ -227,15 +227,15 @@ Test Create Folder Variations:
 5. Parent group owner and folder name (Valid)
 """
 def test_create_folder(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -247,12 +247,12 @@ def test_create_folder(app, client):
     assert b"Group doesn" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = create_folder(client, group.id, "Test Folder")
     assert b"have permission to create folders in this group" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = create_folder(client, group.id, "")
     assert b"Error creating folder" in res4.data
 
@@ -280,15 +280,15 @@ Test Delete Folder Variations:
 4. Folder's Group Owner, 
 """
 def test_delete_folder(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -304,12 +304,12 @@ def test_delete_folder(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_folder(client, folder.id)
     assert b"You do not have permission to delete this folder" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_folder(client, folder.id)
     assert b"Folder deleted" in res4.data
     with app.app_context():
@@ -339,15 +339,15 @@ def test_add_res(app, client):
     def add_url(client, folder_id, url, title):
         return client.post('/add_url', data=dict(url=url, title=title), query_string=dict(folder=folder_id), follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -363,12 +363,12 @@ def test_add_res(app, client):
     assert b"Folder doesn" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = add_url(client, folder.id, "https://www.google.com", "Google")
     assert b"t have permission to add URLs to this folder" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = add_url(client, folder.id, "", "Google")
     assert b"Error adding URL" in res4.data
 
@@ -406,15 +406,15 @@ Test Delete Url Variations:
 4. Valid User, Valid Resource
 """
 def test_delete_res(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -437,12 +437,12 @@ def test_delete_res(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_resource(client, url.id)
     assert b"You do not have permission to delete this resource" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_resource(client, url.id)
     assert b"Resource deleted" in res4.data
 
@@ -474,15 +474,15 @@ def test_add_note(app, client):
                             query_string=dict(folder=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -498,12 +498,12 @@ def test_add_note(app, client):
     assert b"Folder doesn" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = add_notes(client, folder.id, "Test Note", "# Test Content")
     assert b"t have permission to add to this folder" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = add_notes(client, folder.id, "", "# Test Content")
     assert b"Error adding notes" in res4.data
 
@@ -539,15 +539,15 @@ Test Delete Notes Variations:
 4. Valid User, Valid Resource
 """
 def test_delete_note(app, client):
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -571,12 +571,12 @@ def test_delete_note(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_resource(client, note.id)
     assert b"You do not have permission to delete this resource" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_resource(client, note.id)
     assert b"Resource deleted" in res4.data
 
@@ -608,15 +608,15 @@ def test_edit_note(app, client):
                             query_string=dict(id=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -645,7 +645,7 @@ def test_edit_note(app, client):
     assert b"Notes don" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     join_group(client, group.code)
     with app.app_context():
         member = models.Member.query.filter_by(user=user2.id, group=group.id).first()
@@ -653,7 +653,7 @@ def test_edit_note(app, client):
     assert b"t have permission to edit these notes" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = edit_notes(client, note.id, "", "# Test Content")
     assert b"Error editing notes" in res4.data
 
@@ -706,15 +706,15 @@ def test_add_transcript(app, client):
                             query_string=dict(folder=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -736,12 +736,12 @@ def test_add_transcript(app, client):
     assert b"Folder doesn" in res4.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res5 = add_transcript(client, folder.id, "Test Transcript", "test.txt")
     assert b"t have permission to add to this folder" in res5.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res6 = add_transcript(client, folder.id, "Test Transcript", "test.pdf")
     assert b"Invalid file type" in res6.data
 
@@ -790,15 +790,15 @@ def test_add_material(app, client):
                             query_string=dict(folder=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -820,12 +820,12 @@ def test_add_material(app, client):
     assert b"Folder doesn" in res4.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res5 = add_material(client, folder.id, "Test Material", "test.pdf")
     assert b"t have permission to add to this folder" in res5.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res6 = add_material(client, folder.id, "Test Material", "test.txt")
     assert b"Invalid file type" in res6.data
 
@@ -869,15 +869,15 @@ def test_delete_transcript(app, client):
                             query_string=dict(folder=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -897,12 +897,12 @@ def test_delete_transcript(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_resource(client, transcript.id)
     assert b"t have permission to delete this resource" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_resource(client, transcript.id)
     assert b"Resource deleted" in res4.data
     assert os.path.exists(transcript.data) == False
@@ -938,15 +938,15 @@ def test_delete_material(app, client):
                             query_string=dict(folder=folder_id),
                             follow_redirects=True)
 
-    signup(client, "smartnotes_uol@protonmail.com", "Password1", "Password1", True, True)
-    signup(client, "charrison16082002@gmail.com", "Password1", "Password1", True, True)
+    signup(client, "smartnotes_uol@protonmail.com", "Password1!", "Password1!", True, True)
+    signup(client, "charrison16082002@gmail.com", "Password1!", "Password1!", True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
         user2 = models.User.query.filter_by(email="charrison16082002@gmail.com").first()
     verify(client, user.id)
     verify(client, user2.id)
 
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     create_group(client, "Test Group")
     with app.app_context():
         group = models.Group.query.filter_by(title="Test Group", owner=user.id).first()
@@ -966,12 +966,12 @@ def test_delete_material(app, client):
     assert b"Invalid request" in res2.data
 
     client.get('/logout')
-    login(client, "charrison16082002@gmail.com", "Password1")
+    login(client, "charrison16082002@gmail.com", "Password1!")
     res3 = delete_resource(client, material.id)
     assert b"t have permission to delete this resource" in res3.data
 
     client.get('/logout')
-    login(client, "smartnotes_uol@protonmail.com", "Password1")
+    login(client, "smartnotes_uol@protonmail.com", "Password1!")
     res4 = delete_resource(client, material.id)
     assert b"Resource deleted" in res4.data
     assert os.path.exists(material.data) == False

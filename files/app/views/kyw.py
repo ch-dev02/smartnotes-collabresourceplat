@@ -2,7 +2,6 @@ from app import app, db, models, celery
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import current_user, login_required
 from ..forms import *
-from ..scripts import Node, BinarySearchTree
 import logging
 import html
 import time
@@ -147,15 +146,13 @@ def folder_search():
         logger.warning("User %s tried to search a folder that does not have a search tree!", current_user.email)
         logger.error("Folder %s does not have a search tree!", folder_id)
         return "No resources found", 200
-    tree = BinarySearchTree()
-    tree.decode_json(SearchTreeDB.json)
+    tree = json.loads(SearchTreeDB.json)
     resources = []
     words = query.split(" ")
     for word in words:
         stem = ps.stem(word)
-        node = tree.find(stem)
-        if node: # If the word is in the tree
-            resources = resources + node.resources
+        if stem in tree: # If the word is in the tree
+            resources = resources + tree[stem]
     # Count duplicates in resources and put into a dictionary resource:count
     resource_count = {}
     for resource in resources:
@@ -260,13 +257,11 @@ def group_search():
             logger.warning("User %s tried to search a group that does not have a search tree!", current_user.email)
             logger.error("Folder %s does not have a search tree!", folder.id)
             continue
-        tree = BinarySearchTree()
-        tree.decode_json(SearchTreeDB.json)
+        tree = json.loads(SearchTreeDB.json)
         for word in words:
             stem = ps.stem(word)
-            node = tree.find(stem)
-            if node: # If the word is in the tree
-                resources = resources + node.resources
+            if stem in tree: # If the word is in the tree
+                resources = resources + tree[stem]
     resource_count = {}
     for resource in resources:
         if resource in resource_count:
@@ -475,25 +470,24 @@ def generator_pipeline():
                 keywords = extra_keywords
                 logger.warning("Could not extract keywords for resource %d", id)
             if len(keywords) != 0:        
-                tree = BinarySearchTree()
+                tree = {}
                 with app.app_context():
                     SearchTreeDB = models.SearchTree.query.filter_by(folder=resource.folder).first()
                 if SearchTreeDB.json != "":
-                    tree.decode_json(SearchTreeDB.json)
+                    tree = json.loads(SearchTreeDB.json)
                 stems = []
                 for keyword in keywords:
                     words = keyword.split(" ")
                     for w in words:
                         stems.append(ps.stem(w.lower()))
                 for stem in stems:
-                    node = tree.find(stem)
-                    if node is None:
-                        tree.insert(stem, [resource.id])
+                    if stem not in tree:
+                        tree[stem] = [resource.id]
                     else:
-                        resources = node.resources
+                        resources = tree[stem]
                         if resource.id not in resources:
-                            node.resources.append(resource.id)
-                SearchTreeDB.json = tree.encode_json()
+                            tree[stem].append(resource.id)
+                SearchTreeDB.json = json.dumps(tree)
                 with app.app_context():
                     db.session.add(SearchTreeDB)
                     db.session.commit()

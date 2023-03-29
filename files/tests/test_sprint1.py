@@ -91,28 +91,28 @@ Test Signup Variations:
 11. Invalid signup (privacy is empty)
 """
 def test_signup(app, client):    
-    res1 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password2', True, True)
+    res1 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password2!', True, True)
     assert res1.status_code == 200
     assert b'Passwords do not match' in res1.data
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").all()
     assert len(user) is 0
 
-    res2 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', '', True)
+    res2 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', '', True)
     assert res2.status_code == 200
     assert b'Oops an error has occurred' in res2.data
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").all()
     assert len(user) is 0
 
-    res3 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, '')
+    res3 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, '')
     assert res3.status_code == 200
     assert b'Oops an error has occurred' in res3.data
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").all()
     assert len(user) is 0
 
-    res4 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    res4 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     assert res4.status_code == 200
     assert b'Account created successfully' in res4.data
     assert b'Verification email sent' in res4.data
@@ -122,14 +122,14 @@ def test_signup(app, client):
     assert len(user) == 1
     assert user[0].activated == False
 
-    res5 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    res5 = signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     assert res5.status_code == 200
     assert b'Email already in use' in res5.data
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").all()
     assert len(user) is 1
 
-    res6 = signup(client, 'smartnotes_uolprotonmail.com', 'Password1', 'Password1', True, True)
+    res6 = signup(client, 'smartnotes_uolprotonmail.com', 'Password1!', 'Password1!', True, True)
     assert res6.status_code == 200
     assert b'Invalid email' in res6.data
     with app.app_context():
@@ -144,8 +144,8 @@ def test_signup(app, client):
     assert len(user) is 0
 
     res8 = client.post('/signup', data=dict(
-            password='Password1',
-            confirm_password='Password1',
+            password='Password1!',
+            confirm_password='Password1!',
             terms=True,
             privacy=True
         ), follow_redirects=True)
@@ -157,7 +157,7 @@ def test_signup(app, client):
 
     res9 = client.post('/signup', data=dict(
             email="charrison16082002@gmail.com",
-            confirm_password='Password1',
+            confirm_password='Password1!',
             terms=True,
             privacy=True
         ), follow_redirects=True)
@@ -190,7 +190,7 @@ def test_verify(app, client):
     assert res1.status_code == 200
     assert b'Cannot verify email. User not found' in res1.data
 
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
 
@@ -228,25 +228,25 @@ Test Login Variations:
 7. Valid login 
 """
 def test_login(app, client):
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
 
     res1 = client.post('/login', data=dict(
-        password='Password1'
+        password='Password1!'
     ), follow_redirects=True)
     assert res1.status_code == 200
     assert b'Oops an error has occurred' in res1.data
 
     res2 = client.post('/login', data=dict(
-        password='Password1'
+        password='Password1!'
     ), follow_redirects=True)
     assert res1.status_code == 200
     assert b'Oops an error has occurred' in res1.data
 
-    res3 = login(client, 'somebody@email.com', 'Password1')
+    res3 = login(client, 'somebody@email.com', 'Password1!')
     assert res3.status_code == 200
     assert b'Email or Password Incorrect' in res3.data
 
-    res4 = login(client, 'smartnotes_uol@protonmail.com', 'Password1')
+    res4 = login(client, 'smartnotes_uol@protonmail.com', 'Password1!')
     assert res4.status_code == 200
     assert b'Please verify your email' in res4.data
 
@@ -254,16 +254,16 @@ def test_login(app, client):
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
 
-    res5 = login(client, 'smartnotes_uol@protonmail.com', 'Password2')
+    res5 = login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
     assert res5.status_code == 200
     assert b'Email or Password Incorrect' in res5.data
 
-    login(client, 'smartnotes_uol@protonmail.com', 'Password2')
-    login(client, 'smartnotes_uol@protonmail.com', 'Password2')
-    login(client, 'smartnotes_uol@protonmail.com', 'Password2')
-    login(client, 'smartnotes_uol@protonmail.com', 'Password2')
+    login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
+    login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
+    login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
+    login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
 
-    res6 = login(client, 'smartnotes_uol@protonmail.com', 'Password1')
+    res6 = login(client, 'smartnotes_uol@protonmail.com', 'Password1!')
     assert res6.status_code == 200
     assert b'Account is locked' in res6.data
 
@@ -273,7 +273,7 @@ def test_login(app, client):
         user.expire = datetime.now() - timedelta(minutes=20)
         db.session.commit()
     
-    res7 = login(client, 'smartnotes_uol@protonmail.com', 'Password1')
+    res7 = login(client, 'smartnotes_uol@protonmail.com', 'Password1!')
     assert res7.status_code == 200
     assert b'Login Successful' in res7.data
 
@@ -287,11 +287,11 @@ Test Logout Variations:
 1. Valid logout
 """
 def test_logout(app, client):
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    res = login(client, 'smartnotes_uol@protonmail.com', 'Password1')
+    res = login(client, 'smartnotes_uol@protonmail.com', 'Password1!')
     assert res.status_code == 200
     assert b'Login Successful' in res.data
     res = client.get('/logout', follow_redirects=True)
@@ -314,42 +314,42 @@ Test Change Password Variations:
 7. Valid change password (Ensure login works with new password)
 """
 def test_change_pwd(app, client):
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
-    login(client, 'smartnotes_uol@protonmail.com', 'Password1')
+    login(client, 'smartnotes_uol@protonmail.com', 'Password1!')
 
-    res1 = change_pwd(client, '', 'Password2', 'Password2')
+    res1 = change_pwd(client, '', 'Password2!', 'Password2!')
     assert res1.status_code == 200
     print(res1.data)
     assert b'Invalid Request Detected' in res1.data
 
-    res2 = change_pwd(client, 'Password1', '', 'Password2')
+    res2 = change_pwd(client, 'Password1!', '', 'Password2!')
     assert res2.status_code == 200
     assert b'Invalid Request Detected' in res2.data
 
-    res3 = change_pwd(client, 'Password1', 'Password2', '')
+    res3 = change_pwd(client, 'Password1!', 'Password2!', '')
     assert res3.status_code == 200
     assert b'Invalid Request Detected' in res3.data
 
-    res4 = change_pwd(client, 'Password2', 'Password3', 'Password3')
+    res4 = change_pwd(client, 'Password2!', 'Password3!', 'Password3!')
     assert res4.status_code == 200
     assert b'Invalid Password' in res4.data
     
-    res5 = change_pwd(client, 'Password1', 'Password2', 'Password3')
+    res5 = change_pwd(client, 'Password1!', 'Password2!', 'Password3!')
     assert res5.status_code == 200
     assert b'Passwords do not match' in res5.data
 
-    res6 = change_pwd(client, 'Password1', 'pass', 'pass')
+    res6 = change_pwd(client, 'Password1!', 'pass', 'pass')
     assert res6.status_code == 200
     assert b'Password must have at least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character' in res6.data
 
-    res7 = change_pwd(client, 'Password1', 'Password2', 'Password2')
+    res7 = change_pwd(client, 'Password1!', 'Password2!', 'Password2!')
     assert res7.status_code == 200
     assert b'Password Changed' in res7.data
     client.get('/logout', follow_redirects=True)
-    res8 = login(client, 'smartnotes_uol@protonmail.com', 'Password2')
+    res8 = login(client, 'smartnotes_uol@protonmail.com', 'Password2!')
     assert res8.status_code == 200
     assert b'Login Successful' in res8.data
 
@@ -365,7 +365,7 @@ Test Forgot Password Variations:
 3. Valid forgot password
 """
 def test_forgot_password(app, client):
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
@@ -407,7 +407,7 @@ Test Reset Password Variations:
 10. Invalid reset password (token expired)
 """
 def test_reset_password(app, client):
-    signup(client, 'smartnotes_uol@protonmail.com', 'Password1', 'Password1', True, True)
+    signup(client, 'smartnotes_uol@protonmail.com', 'Password1!', 'Password1!', True, True)
     with app.app_context():
         user = models.User.query.filter_by(email="smartnotes_uol@protonmail.com").first()
     verify(client, user.id)
@@ -419,31 +419,31 @@ def test_reset_password(app, client):
         token = models.PassToken.query.filter_by(user=user.id).first()
     assert token is not None
 
-    res1 = reset_pwd(client, '', token.token, 'Password2', 'Password2')
+    res1 = reset_pwd(client, '', token.token, 'Password2!', 'Password2!')
     assert res1.status_code == 200
     assert b'Cannot reset password. Invalid form' in res1.data
 
-    res2 = reset_pwd(client, user.id, '', 'Password2', 'Password2')
+    res2 = reset_pwd(client, user.id, '', 'Password2!', 'Password2!')
     assert res2.status_code == 200
     assert b'Cannot reset password. Invalid form' in res2.data
 
-    res3 = reset_pwd(client, user.id, token.token, '', 'Password2')
+    res3 = reset_pwd(client, user.id, token.token, '', 'Password2!')
     assert res3.status_code == 200
     assert b'Cannot reset password. Invalid form' in res3.data
 
-    res4 = reset_pwd(client, user.id, token.token, 'Password2', '')
+    res4 = reset_pwd(client, user.id, token.token, 'Password2!', '')
     assert res4.status_code == 200
     assert b'Cannot reset password. Invalid form' in res4.data
 
-    res5 = reset_pwd(client, 20, token.token, 'Password2', 'Password2')
+    res5 = reset_pwd(client, 20, token.token, 'Password2!', 'Password2!')
     assert res5.status_code == 200
     assert b'Cannot reset password. User not found' in res5.data
 
-    res6 = reset_pwd(client, user.id, '0', 'Password2', 'Password2')
+    res6 = reset_pwd(client, user.id, '0', 'Password2!', 'Password2!')
     assert res6.status_code == 200
     assert b'Cannot reset password. Token not found' in res6.data
 
-    res7 = reset_pwd(client, user.id, token.token, 'Password2', 'Password3')
+    res7 = reset_pwd(client, user.id, token.token, 'Password2!', 'Password3!')
     assert res7.status_code == 200
     assert b'Cannot reset password. Passwords do not match' in res7.data
 
@@ -451,10 +451,10 @@ def test_reset_password(app, client):
     assert res8.status_code == 200
     assert b'Cannot reset password. Password does not meet requirements' in res8.data
 
-    res9 = reset_pwd(client, user.id, token.token, 'Password10', 'Password10')
+    res9 = reset_pwd(client, user.id, token.token, 'Password1!0', 'Password1!0')
     assert res9.status_code == 200
     assert b'Password reset successful' in res9.data
-    res9a = login(client, 'smartnotes_uol@protonmail.com', 'Password10')
+    res9a = login(client, 'smartnotes_uol@protonmail.com', 'Password1!0')
     assert res9a.status_code == 200
     assert b'Login Successful' in res9a.data
 
@@ -463,7 +463,7 @@ def test_reset_password(app, client):
         token2 = models.PassToken(user=user.id, token='0', expire=datetime.now() - timedelta(minutes=30))
         db.session.add(token2)
         db.session.commit()
-    res10 = reset_pwd(client, user.id, '0', 'Password11', 'Password11')
+    res10 = reset_pwd(client, user.id, '0', 'Password1!1', 'Password1!1')
     assert res10.status_code == 200
     assert b'Cannot reset password. Token expired' in res10.data
 
