@@ -345,6 +345,7 @@ def generator_pipeline():
         headers = {}
         headers_sorted = []
         for line in data:
+            line = line.lstrip()
             words = line.split(" ")
             hashes = num_hashes(words[0])
             words[-1] = words[-1].replace("\r", "")
